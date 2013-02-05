@@ -1,8 +1,0 @@
-test:
-  adapter: sqlite
-  database: <%= Playa::Root %>/db/test.db
-
-development:
-  adapter: sqlite
-  database: <%= Playa::Root %>/db/development.db
-  logger: _stderr_
