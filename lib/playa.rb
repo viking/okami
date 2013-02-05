@@ -24,5 +24,6 @@ end
 require "playa/version"
 require "playa/artist"
 require "playa/album"
+require "playa/track"
 require "playa/views"
 require "playa/application"
