@@ -9,6 +9,7 @@ group :development do
   gem 'rack-test'
   gem 'mocha'
   gem 'rake'
+  gem 'debugger'
 
   # Guard gems
   gem 'guard'

@@ -1,6 +1,7 @@
 require 'sinatra/base'
 require 'mustache/sinatra'
 require 'sequel'
+require 'mp3info'
 require 'erb'
 require 'yaml'
 require 'pathname'
@@ -17,5 +18,6 @@ require "playa/database"
 require "playa/artist"
 require "playa/album"
 require "playa/track"
+require "playa/loader"
 require "playa/views"
 require "playa/application"

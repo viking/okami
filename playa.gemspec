@@ -20,4 +20,5 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'sinatra'
   gem.add_dependency 'sequel'
   gem.add_dependency 'mustache'
+  gem.add_dependency 'ruby-mp3info'
 end

@@ -49,3 +49,14 @@ namespace :db do
   desc "Reset the database"
   task :reset, [:env] => [:nuke, :migrate]
 end
+
+# To record mp3 files with sox, you need the following
+# packages: sox libsox-fmt-mp3
+desc "Generate white noise mp3 with sox"
+task :noise, :filename do |cmd, args|
+  if args[:filename].nil?
+    puts "Filename argument required!"
+  else
+    `rec #{args[:filename]} synth 1 whitenoise vol 0.25`
+  end
+end
