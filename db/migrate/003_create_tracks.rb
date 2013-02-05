@@ -7,6 +7,8 @@ Sequel.migration do
       String :filename
       foreign_key :artist_id, :artists
       foreign_key :album_id, :albums
+      DateTime :created_at
+      DateTime :updated_at
     end
   end
 end

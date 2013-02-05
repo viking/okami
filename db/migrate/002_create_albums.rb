@@ -6,6 +6,8 @@ Sequel.migration do
       Integer :year
       TrueClass :compilation
       foreign_key :artist_id, :artists
+      DateTime :created_at
+      DateTime :updated_at
     end
   end
 end
