@@ -1,0 +1,15 @@
+require 'helper'
+
+class TestApplication < Test::Unit::TestCase
+  include Rack::Test::Methods
+
+  def app
+    Playa::Application
+  end
+
+  test "index" do
+    get '/'
+    assert last_response.ok?
+    assert_match "sup?", last_response.body
+  end
+end
