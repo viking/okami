@@ -8,6 +8,7 @@ group :development do
   gem 'test-unit'
   gem 'rack-test'
   gem 'mocha'
+  gem 'timecop'
   gem 'rake'
   gem 'debugger'
 
