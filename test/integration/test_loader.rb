@@ -166,4 +166,21 @@ class TestLoader < Test::Unit::TestCase
       assert_equal "Blah", album.name
     end
   end
+
+  test "#run cleans up orphaned records after file deletion" do
+    Dir.mktmpdir do |root|
+      FileUtils.cp(fixture_path("foo.mp3"), root)
+      mp3_file = File.join(root, "foo.mp3")
+
+      loader = Loader.new(root)
+      loader.run
+
+      FileUtils.rm(mp3_file)
+      loader.run
+
+      assert_equal 0, Artist.count
+      assert_equal 0, Album.count
+      assert_equal 0, Track.count
+    end
+  end
 end

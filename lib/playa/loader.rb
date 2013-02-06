@@ -31,34 +31,38 @@ module Playa
     end
 
     def traverse(dir)
+      marked = Track.select_map(:id)
       Dir.glob(File.join(dir, "*")).each do |filename|
         info = Info.new(filename)
         track = Track.filter(:filename => info.track[:filename]).first
-        if track && File.stat(filename).mtime > track.updated_at
-          track_attribs = info.track
+        if track
+          marked.delete_at(marked.index(track.id))
+          if File.stat(filename).mtime > track.updated_at
+            track_attribs = info.track
 
-          artist = track.artist
-          new_artist = nil
-          unless info.artist.all? { |(k, v)| artist[k] == v }
-            new_artist = Artist.find_or_create(info.artist)
-            track_attribs[:artist] = new_artist
-          end
+            artist = track.artist
+            new_artist = nil
+            unless info.artist.all? { |(k, v)| artist[k] == v }
+              new_artist = Artist.find_or_create(info.artist)
+              track_attribs[:artist] = new_artist
+            end
 
-          album = track.album
-          new_album = nil
-          if info.album.any? { |(k, v)| album[k] != v }
-            new_album = Album.find_or_create(info.album.merge(:artist => artist))
-            track_attribs[:album] = new_album
-          elsif new_artist
-            album.update(:artist => new_artist)
-          end
+            album = track.album
+            new_album = nil
+            if info.album.any? { |(k, v)| album[k] != v }
+              new_album = Album.find_or_create(info.album.merge(:artist => artist))
+              track_attribs[:album] = new_album
+            elsif new_artist
+              album.update(:artist => new_artist)
+            end
 
-          track.update(track_attribs)
-          if new_artist && artist.tracks_dataset.count == 0
-            artist.albums.each(&:destroy)
-            artist.destroy
-          elsif new_album && album.tracks_dataset.count == 0
-            album.destroy
+            track.update(track_attribs)
+            if new_artist && artist.tracks_dataset.count == 0
+              artist.albums.each(&:destroy)
+              artist.destroy
+            elsif new_album && album.tracks_dataset.count == 0
+              album.destroy
+            end
           end
         else
           artist = Artist.find_or_create(info.artist)
@@ -66,6 +70,9 @@ module Playa
           track = Track.create(info.track.merge(:artist => artist, :album => album))
         end
       end
+      Track.filter(:id => marked).each(&:destroy)
+      Album.orphaned.each(&:destroy)
+      Artist.orphaned.each(&:destroy)
     end
   end
 end
