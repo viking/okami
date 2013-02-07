@@ -6,7 +6,7 @@ module Playa
       def initialize(filename)
         case filename
         when /\.mp3$/i
-          mp3 = Mp3Info.new(filename)
+          mp3 = Mp3Info.new(filename, :parse_mp3 => false)
           @artist = { :name => mp3.tag.artist }
           @album = { :name => mp3.tag.album, :year => mp3.tag.year }
           @track = {
@@ -15,6 +15,10 @@ module Playa
           }
           mp3.close
         end
+      end
+
+      def empty?
+        @track.nil?
       end
     end
 
@@ -27,16 +31,29 @@ module Playa
     end
 
     def run
-      traverse(@root)
+      marked = Track.select_map(:id)
+      unmark = traverse(@root)
+      marked -= unmark
+
+      Track.filter(:id => marked).each(&:destroy)
+      Album.orphaned.each(&:destroy)
+      Artist.orphaned.each(&:destroy)
     end
 
     def traverse(dir)
-      marked = Track.select_map(:id)
+      track_ids_found = []
       Dir.glob(File.join(dir, "*")).each do |filename|
+        if File.directory?(filename)
+          track_ids_found += traverse(filename)
+          next
+        end
+
         info = Info.new(filename)
+        next if info.empty?
+
         track = Track.filter(:filename => info.track[:filename]).first
         if track
-          marked.delete_at(marked.index(track.id))
+          track_ids_found << track.id
           if File.stat(filename).mtime > track.updated_at
             track_attribs = info.track
 
@@ -70,9 +87,7 @@ module Playa
           track = Track.create(info.track.merge(:artist => artist, :album => album))
         end
       end
-      Track.filter(:id => marked).each(&:destroy)
-      Album.orphaned.each(&:destroy)
-      Artist.orphaned.each(&:destroy)
+      track_ids_found
     end
   end
 end

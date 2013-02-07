@@ -60,6 +60,20 @@ class TestLoader < Test::Unit::TestCase
     end
   end
 
+  test "#run creates new album if artist doesn't match" do
+    Dir.mktmpdir do |root|
+      FileUtils.cp(fixture_path("bar.mp3"), root)
+      FileUtils.cp(fixture_path("bar-2.mp3"), root)
+
+      loader = Loader.new(root)
+      loader.run
+
+      assert_equal 1, Artist.count
+      assert_equal 2, Album.count
+      assert_equal 2, Track.count
+    end
+  end
+
   test "#run updates track title" do
     Dir.mktmpdir do |root|
       FileUtils.cp(fixture_path("foo.mp3"), root)
@@ -181,6 +195,23 @@ class TestLoader < Test::Unit::TestCase
       assert_equal 0, Artist.count
       assert_equal 0, Album.count
       assert_equal 0, Track.count
+    end
+  end
+
+  test "#run descends into subdirectories" do
+    Dir.mktmpdir do |root|
+      foo_dir = File.join(root, "foo")
+      FileUtils.mkdir(foo_dir)
+      FileUtils.cp(fixture_path("bar.mp3"), root)
+      FileUtils.cp(fixture_path("foo.mp3"), foo_dir)
+      mp3_file = File.join(foo_dir, "foo.mp3")
+
+      loader = Loader.new(root)
+      loader.run
+
+      assert_equal 2, Artist.count
+      assert_equal 2, Album.count
+      assert_equal 2, Track.count
     end
   end
 end
