@@ -15,17 +15,32 @@ module Playa
     end
 
     get "/artists" do
-      @artists = Artist.all
+      @artists = Artist.order(:name).all
       mustache :"artists/index", :layout => false
     end
 
-    get "/albums/:artist_id" do
-      @albums = Album.filter(:artist_id => params[:artist_id]).all
+    get "/albums" do
+      dataset = Album
+      if params[:artist_id]
+        dataset = dataset.filter(:albums__artist_id => params[:artist_id])
+      end
+      if params[:tracks] == "true"
+        dataset = dataset.eager_graph(:tracks).
+          order(:albums__year, :albums__name, :tracks__number)
+        @include_tracks = true
+      else
+        dataset = dataset.order(:year, :name)
+      end
+      @albums = dataset.all
       mustache :"albums/index", :layout => false
     end
 
-    get "/tracks/:album_id" do
-      @tracks = Track.filter(:album_id => params[:album_id]).all
+    get "/tracks" do
+      dataset = Track.order(:number)
+      if params[:album_id]
+        dataset = dataset.filter(:album_id => params[:album_id])
+      end
+      @tracks = dataset.all
       mustache :"tracks/index", :layout => false
     end
   end
