@@ -1,0 +1,39 @@
+html, body {
+  height: 100%;
+}
+
+#sidebar {
+  position: fixed;
+  width: 250px;
+  height: 100%;
+  overflow: auto;
+  border-right: 1px solid gray;
+}
+#sidebar h2 {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.2em;
+  padding: 0.5em;
+}
+#sidebar ul.artists {
+  padding: 0 1em 1em 1em;
+}
+#sidebar ul.albums {
+  padding: 0.3em 0 0 1em;
+}
+#sidebar ul.tracks {
+  padding: 0.3em 0 0 1em;
+}
+#sidebar li.artist,
+#sidebar li.album,
+#sidebar li.track {
+  padding: 0.3em;
+  cursor: pointer;
+}
+
+#playlist {
+  margin-left: 250px;
+  display: block;
+  height: 100%;
+  padding: 10px;
+}
