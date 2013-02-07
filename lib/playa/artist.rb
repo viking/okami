@@ -12,5 +12,9 @@ module Playa
         filter(:id => ids)
       end
     end
+
+    def formatted_name
+      (name.nil? || name.empty?) ? "Unknown" : name
+    end
   end
 end
