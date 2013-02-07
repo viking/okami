@@ -31,6 +31,13 @@ class SequenceHelper
   end
 end
 
+module XhrHelper
+  def xhr(path, params={})
+    verb = params.delete(:as) || :get
+    send(verb, path, params, "HTTP_X_REQUESTED_WITH" => "XMLHttpRequest")
+  end
+end
+
 class Test::Unit::TestCase
   alias_method :run_without_transactions, :run
 

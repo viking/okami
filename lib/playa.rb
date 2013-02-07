@@ -11,6 +11,7 @@ module Playa
   Root = (Pathname.new(File.dirname(__FILE__)) + '..').expand_path
   Env = ENV['RACK_ENV'] || 'development'
 end
+Sequel::Model.plugin :json_serializer
 
 require "playa/version"
 require "playa/config"
