@@ -1,10 +1,10 @@
 {{#tracks_hidden}}
-<ul class="tracks" style="display: none;">
+<div class="tracks" style="display: none;">
 {{/tracks_hidden}}
 {{^tracks_hidden}}
-<ul class="tracks">
+<div class="tracks">
 {{/tracks_hidden}}
 {{#tracks}}
-  <li class="track track-{{id}}" data-id="{{id}}" data-number="{{number}}" data-name="{{formatted_name}}" data-artist_id="{{artist_id}}" data-album_id="{{album_id}}">{{formatted_name}}</li>
+  <div class="track track-{{id}} album-{{album_id}} artist-{{artist_id}}" data-id="{{id}}" data-number="{{number}}" data-name="{{formatted_name}}" data-artist_id="{{artist_id}}" data-album_id="{{album_id}}">{{formatted_name}}</div>
 {{/tracks}}
-</ul>
+</div>

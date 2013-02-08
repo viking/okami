@@ -15,18 +15,18 @@ html, body {
   font-size: 1.2em;
   padding: 0.5em;
 }
-#sidebar ul.artists {
+#sidebar .artists {
   padding: 0 1em 1em 1em;
 }
-#sidebar ul.albums {
+#sidebar .albums {
   padding: 0.3em 0 0 1em;
 }
-#sidebar ul.tracks {
+#sidebar .tracks {
   padding: 0.3em 0 0 1em;
 }
-#sidebar li.artist,
-#sidebar li.album,
-#sidebar li.track {
+#sidebar .artist,
+#sidebar .album,
+#sidebar .track {
   padding: 0.3em;
   cursor: pointer;
 }
@@ -36,4 +36,8 @@ html, body {
   display: block;
   height: 100%;
   padding: 10px;
+}
+#playlist table th,
+#playlist table td {
+  padding: 0.3em 0.5em;
 }

@@ -1,8 +1,8 @@
-<ul class="albums">
+<div class="albums">
 {{#albums}}
-  <li class="album album-{{id}}" data-id="{{id}}" data-year="{{year}}" data-name="{{formatted_name}}" data-artist_id="{{artist_id}}">
+  <div class="album album-{{id}} artist-{{artist_id}}" data-id="{{id}}" data-year="{{year}}" data-name="{{formatted_name}}" data-artist_id="{{artist_id}}">
     {{formatted_name}}
-    {{#include_tracks}}{{>tracks/index}}{{/include_tracks}}
-  </li>
+  </div>
+  {{#include_tracks}}{{>tracks/index}}{{/include_tracks}}
 {{/albums}}
-</ul>
+</div>

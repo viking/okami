@@ -23,8 +23,8 @@
       params.tracks = 'true';
     }
     $.get('/albums', params, function(data) {
-      artist.append(data);
-      artist.find('.album').draggable({
+      artist.after(data);
+      artist.next('.albums').find('.album').draggable({
         revert: 'invalid',
         helper: albumHelper,
         appendTo: 'body'
@@ -36,8 +36,8 @@
   }
   function loadTracks(album, callback) {
     $.get('/tracks', {album_id: album.data('id')}, function(data) {
-      album.append(data);
-      album.find('.track').draggable({
+      album.after(data);
+      album.next('.tracks').find('.track').draggable({
         revert: 'invalid',
         helper: trackHelper,
         appendTo: 'body'
@@ -69,20 +69,21 @@
     return(result);
   }
   function queueTracks(tracks) {
-    var playlist = $('#playlist > table');
+    var playlist = $('#playlist > table > tbody');
     tracks.each(function() {
       var track = $(this);
       var view = {
         number: track.data('number'),
         track: track.data('name'),
-        album: $('.album-'+track.data('album_id')).data('name'),
-        artist: $('.artist-'+track.data('artist_id')).data('name')
+        album: $('.album.album-'+track.data('album_id')).data('name'),
+        artist: $('.artist.artist-'+track.data('artist_id')).data('name')
       };
       playlist.append($.mustache(rowTemplate, view));
     });
   }
   $(function() {
     $('#playlist').droppable({
+      accept: '.track, .album, .artist',
       drop: function(e, ui) {
         var obj = ui.draggable;
         var tracks;
@@ -91,8 +92,7 @@
         }
         else {
           var which = obj.hasClass('artist') ? 'artist' : 'album';
-          var selector = '#sidebar .' + which + '-' +
-            obj.data('id') + ' .track';
+          var selector = '#sidebar .track.' + which + '-' + obj.data('id');
           tracks = $(selector);
           if (tracks.length == 0) {
             if (which == 'artist') {
@@ -110,7 +110,7 @@
         }
         queueTracks(tracks);
       }
-    });
+    }).find('table > tbody').sortable();
     var sidebar = $('#sidebar');
     $.get('/artists', function(data) {
       sidebar.append(data);
@@ -122,9 +122,9 @@
     }, 'html');
 
     sidebar.
-      on('click', 'li.artist', function(e) {
+      on('click', '.artist', function(e) {
         var artist = $(this);
-        var albums = artist.find('ul');
+        var albums = artist.next('.albums');
         if (albums.length == 0) {
           loadAlbums(artist);
         }
@@ -132,11 +132,9 @@
           albums.toggle();
         }
       }).
-      on('click', 'li.album', function(e) {
-        e.stopPropagation();
-
+      on('click', '.album', function(e) {
         var album = $(this);
-        var tracks = album.find('ul');
+        var tracks = album.next('.tracks');
         if (tracks.length == 0) {
           loadTracks(album);
         }
@@ -144,8 +142,7 @@
           tracks.toggle();
         }
       }).
-      on('click', 'li.track', function(e) {
-        e.stopPropagation();
+      on('click', '.track', function(e) {
       });
   });
 </script>
