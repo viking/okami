@@ -182,6 +182,15 @@ $(function() {
     on('click', '.track', function(e) {
     });
 
+  $('#clear').button({
+    icons: {
+      primary: "ui-icon-trash"
+    },
+    text: false
+  }).click(function(e) {
+    $('#playlist tbody').html('');
+  });
+
   $('#prev').button({
     icons: {
       primary: "ui-icon-seek-first"
