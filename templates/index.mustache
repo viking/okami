@@ -15,6 +15,14 @@
     </tbody>
   </table>
 </div>
+<div id="controls">
+  <div class="buttons">
+    <button id="prev">Previous</button>
+    <button id="play">Play</button>
+    <button id="stop">Stop</button>
+    <button id="next">Next</button>
+  </div>
+</div>
 <script type="text/javascript">
   var rowTemplate = {{{playlist_row_template}}};
   function loadAlbums(artist, includeTracks, callback) {
@@ -144,5 +152,34 @@
       }).
       on('click', '.track', function(e) {
       });
+
+    $('#prev').button({
+      icons: {
+        primary: "ui-icon-seek-first"
+      },
+      text: false
+    });
+    $('#play').button({
+      icons: {
+        primary: "ui-icon-play"
+      },
+      text: false
+    });
+    $('#stop').button({
+      icons: {
+        primary: "ui-icon-stop"
+      },
+      text: false
+    });
+    $('#next').button({
+      icons: {
+        primary: "ui-icon-seek-end"
+      },
+      text: false
+    });
+
+    soundManager.setup({
+      url: '/swf/'
+    });
   });
 </script>
