@@ -47,9 +47,17 @@ html, body {
   padding: 10px;
   overflow: auto;
 }
+#playlist table th {
+  text-align: left;
+  font-weight: bold;
+}
 #playlist table th,
 #playlist table td {
   padding: 0.3em 0.5em;
+}
+#playlist tr.selected td {
+  color: white;
+  background-color: navy;
 }
 
 #controls {

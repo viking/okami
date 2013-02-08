@@ -20,7 +20,7 @@ class TestApplication < Test::Unit::TestCase
     dataset.expects(:all).returns([artist])
     xhr '/artists'
     assert last_response.ok?
-    assert_match %r{^<ul}, last_response.body
+    assert_match %r{^<div}, last_response.body
   end
 
   test "/albums" do
@@ -31,7 +31,7 @@ class TestApplication < Test::Unit::TestCase
 
     xhr '/albums'
     assert last_response.ok?
-    assert_match %r{^<ul}, last_response.body
+    assert_match %r{^<div}, last_response.body
   end
 
   test "/albums?artist_id=1" do
@@ -43,7 +43,7 @@ class TestApplication < Test::Unit::TestCase
 
     xhr '/albums', :artist_id => 1
     assert last_response.ok?
-    assert_match %r{^<ul}, last_response.body
+    assert_match %r{^<div}, last_response.body
   end
 
   test "/albums?artist_id=1&tracks=true" do
@@ -72,7 +72,7 @@ class TestApplication < Test::Unit::TestCase
 
     xhr '/tracks'
     assert last_response.ok?
-    assert_match %r{^<ul}, last_response.body
+    assert_match %r{^<div}, last_response.body
   end
 
   test "/tracks?album_id=1" do
@@ -84,6 +84,19 @@ class TestApplication < Test::Unit::TestCase
 
     xhr '/tracks', :album_id => 1
     assert last_response.ok?
-    assert_match %r{^<ul}, last_response.body
+    assert_match %r{^<div}, last_response.body
+  end
+
+  test "/tracks/1" do
+    track = stub('track', {
+      :id => 1, :formatted_name => 'foo', :number => 1,
+      :filename => "/foo/bar/foo.mp3"
+    })
+    Playa::Track.expects(:[]).with(:id => '1').returns(track)
+    IO.expects(:copy_stream).
+      with("/foo/bar/foo.mp3", instance_of(Sinatra::Helpers::Stream))
+
+    xhr '/tracks/1'
+    assert last_response.ok?
   end
 end

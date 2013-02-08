@@ -18,6 +18,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
   gem.add_dependency 'sinatra'
+  gem.add_dependency 'sinatra-contrib'
   gem.add_dependency 'sequel'
   gem.add_dependency 'mustache'
   gem.add_dependency 'ruby-mp3info'

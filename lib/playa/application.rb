@@ -1,6 +1,7 @@
 module Playa
   class Application < Sinatra::Base
     register Mustache::Sinatra
+    helpers Sinatra::Streaming
 
     set :root, Root.to_s
     set :mustache, {
@@ -42,6 +43,13 @@ module Playa
       end
       @tracks = dataset.all
       mustache :"tracks/index", :layout => false
+    end
+
+    get "/tracks/:id" do
+      track = Track[:id => params[:id]]
+      stream do |out|
+        IO.copy_stream(track.filename, out)
+      end
     end
   end
 end
