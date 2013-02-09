@@ -3,8 +3,8 @@ html, body {
   height: 100%;
 }
 
-#body {
-  position: relative;
+.clear {
+  clear: both;
 }
 
 #sidebar {
@@ -47,20 +47,55 @@ html, body {
   padding: 10px;
   overflow: auto;
 }
-#playlist table th {
-  text-align: left;
+#playlist .header {
   font-weight: bold;
+  padding-bottom: 0.3em;
 }
-#playlist table th,
-#playlist table td {
-  padding: 0.3em 0.5em;
+#playlist .number {
+  float: left;
+  width: 2em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
-#playlist tr.selected td {
+#playlist .title {
+  float: left;
+  width: 20em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+#playlist .artist {
+  float: left;
+  width: 20em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+#playlist .album {
+  float: left;
+  width: 20em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+#playlist .track {
+  padding: 0.3em 0;
+}
+#playlist .playing {
   color: white;
-  background-color: navy;
+  background-color: green;
+}
+#playlist .paused {
+  color: black;
+  background-color: yellow;
+}
+#playlist .stopped {
+  color: white;
+  background-color: red;
 }
 
-#controls {
+.controls {
   position: absolute;
   left: 250px;
   bottom: 0px;
@@ -68,7 +103,7 @@ html, body {
   height: 100px;
   border-top: 1px solid gray;
 }
-#controls .buttons {
+.controls .buttons {
   text-align: center;
   margin-top: 25px;
 }

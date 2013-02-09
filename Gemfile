@@ -10,7 +10,6 @@ group :development do
   gem 'mocha'
   gem 'timecop'
   gem 'rake'
-  gem 'debugger'
 
   # Guard gems
   gem 'guard'

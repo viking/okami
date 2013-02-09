@@ -31,95 +31,40 @@ function loadTracks(album, callback) {
 }
 function artistHelper(e) {
   var artist = $(this);
-  var result = $('<div class="artist"></div>');
-  result.data(artist.data());
+  var result = $('<div class="artist-drop"></div>');
   result.html(artist.data('name'));
   return(result);
 }
 function albumHelper(e) {
   var album = $(this);
-  var result = $('<div class="album"></div>');
-  result.data(album.data());
+  var result = $('<div class="album-drop"></div>');
   result.html(album.data('name'));
   return(result);
 }
 function trackHelper(e) {
   var track = $(this);
-  var result = $('<div class="track"></div>');
-  result.data(track.data());
+  var result = $('<div class="track-drop"></div>');
   result.html(track.data('name'));
   return(result);
 }
 function queueTracks(tracks) {
-  var playlist = $('#playlist > table > tbody');
   tracks.each(function() {
     var track = $(this);
     var view = {
+      id: track.data('id'),
+      url: '/tracks/' + track.data('id'),
       number: track.data('number'),
-      track: track.data('name'),
+      title: track.data('name'),
       album: $('.album.album-'+track.data('album_id')).data('name'),
       artist: $('.artist.artist-'+track.data('artist_id')).data('name')
     };
-    var row = $($.mustache(rowTemplate, view));
-    row.data('track_id', track.data('id'));
-    playlist.append(row);
+    $('#playlist').playlist('append', view);
   });
-}
-function selectedSong() {
-  return $('#playlist tbody tr.selected');
-}
-function selectPrevSong() {
-  var current = selectedSong();
-  if (current.length == 0) {
-    $('#playlist tbody tr:last').addClass('selected');
-  }
-  else if (!current.is('#playlist tbody tr:first')) {
-    current.removeClass('selected');
-    current.prev('tr').addClass('selected');
-  }
-}
-function selectNextSong() {
-  var current = selectedSong();
-  if (current.length == 0) {
-    $('#playlist tbody tr:first').addClass('selected');
-  }
-  else if (!current.is('#playlist tbody tr:last')) {
-    current.removeClass('selected');
-    current.next('tr').addClass('selected');
-  }
-}
-function playSelectedSong() {
-  var current = selectedSong();
-  if (current.length == 0) {
-    return;
-  }
-
-  var track_id = current.data('track_id');
-  currentSong = soundManager.createSound({
-    id: 'track-' + track_id,
-    url: '/tracks/' + track_id,
-    autoLoad: true,
-    volume: 50,
-    onload: function(success) {
-      if (success) {
-        this.play();
-        $('#play').button('option', 'icons', {primary: 'ui-icon-pause'}).
-          addClass('pause');
-      }
-    },
-    onfinish: function() {
-      this.destruct();
-      playNextSong();
-    }
-  });
-}
-function playNextSong() {
-  selectNextSong();
-  playSelectedSong();
 }
 $(function() {
+  $('#playlist').playlist();
   $('#playlist').droppable({
-    accept: '.track, .album, .artist',
+    accept: '#sidebar .artist, #sidebar .album, #sidebar .track',
     drop: function(e, ui) {
       var obj = ui.draggable;
       var tracks;
@@ -147,7 +92,6 @@ $(function() {
       queueTracks(tracks);
     }
   });
-  $('#playlist > table > tbody').sortable();
   var sidebar = $('#sidebar');
   $.get('/artists', function(data) {
     sidebar.append(data);
@@ -181,91 +125,6 @@ $(function() {
     }).
     on('click', '.track', function(e) {
     });
-
-  $('#clear').button({
-    icons: {
-      primary: "ui-icon-trash"
-    },
-    text: false
-  }).click(function(e) {
-    $('#playlist tbody').html('');
-  });
-
-  $('#prev').button({
-    icons: {
-      primary: "ui-icon-seek-first"
-    },
-    text: false
-  }).click(function(e) {
-    var startPlaying = false;
-    selectPrevSong();
-    if (currentSong) {
-      startPlaying = currentSong.playState == 1;
-      currentSong.stop();
-      currentSong.destruct();
-    }
-    if (startPlaying) {
-      playSelectedSong();
-    }
-  });
-
-  $('#play').button({
-    icons: {
-      primary: "ui-icon-play"
-    },
-    text: false
-  }).click(function(e) {
-    var obj = $(this);
-    if (currentSong) {
-      if (obj.hasClass('pause')) {
-        currentSong.pause();
-        obj.removeClass('pause');
-        obj.button('option', 'icons', {primary: 'ui-icon-play'})
-      }
-      else {
-        currentSong.play();
-        obj.addClass('pause');
-        obj.button('option', 'icons', {primary: 'ui-icon-pause'})
-      }
-    }
-    else if (selectedSong().length == 0) {
-      playNextSong();
-    }
-    else {
-      playSelectedSong();
-    }
-  });
-
-  $('#stop').button({
-    icons: {
-      primary: "ui-icon-stop"
-    },
-    text: false
-  }).click(function(e) {
-    if (currentSong) {
-      currentSong.stop();
-    }
-    $('#play').removeClass('pause').
-      button('option', 'icons', {primary: 'ui-icon-play'})
-  });
-
-  $('#next').button({
-    icons: {
-      primary: "ui-icon-seek-end"
-    },
-    text: false
-  }).click(function(e) {
-    var startPlaying = false;
-    selectNextSong();
-    if (currentSong) {
-      startPlaying = currentSong.playState == 1;
-      currentSong.stop();
-      currentSong.destruct();
-    }
-    if (startPlaying) {
-      playSelectedSong();
-    }
-  });
 
   soundManager.setup({
     url: '/swf/'
