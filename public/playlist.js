@@ -92,7 +92,9 @@ $.extend(playlist.prototype, {
   },
 
   clear: function() {
-    this.deleteSound();
+    if (this.state == 'playing' || this.state == 'stopped' || this.state == 'paused') {
+      this.deleteSound();
+    }
     this.tracks.html('');
     this.position = -1;
     this.setState('empty');
