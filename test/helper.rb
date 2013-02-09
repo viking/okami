@@ -7,7 +7,9 @@ rescue Bundler::BundlerError => e
   $stderr.puts "Run `bundle install` to install missing gems"
   exit e.status_code
 end
+
 ENV['RACK_ENV'] = 'test'
+ENV['PLAYA_DATABASE'] = File.join(File.dirname(__FILE__), "..", "db", "test.db")
 
 require 'test/unit'
 require 'mocha/setup'

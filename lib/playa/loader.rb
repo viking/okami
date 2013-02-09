@@ -23,7 +23,7 @@ module Playa
     end
 
     def self.run
-      new(Config['library']).run
+      new(Library).run
     end
 
     def initialize(root)

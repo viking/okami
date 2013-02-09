@@ -19,7 +19,6 @@ namespace :db do
     Rake::Task['environment'].invoke(env)
 
     unless Dir.glob("db/migrate/*.rb").empty?
-      require 'sequel/extensions/migration'
       Sequel::Migrator.apply(Playa::Database, "db/migrate")
     end
   end
@@ -30,7 +29,6 @@ namespace :db do
     Rake::Task['environment'].invoke(env)
 
     unless Dir.glob("db/migrate/*.rb").empty?
-      require 'sequel/extensions/migration'
       version = (row = Playa::Database[:schema_info].first) ? row[:version] : nil
       Sequel::Migrator.apply(Playa::Database, "db/migrate", version - 1)
     end

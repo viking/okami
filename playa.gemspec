@@ -7,9 +7,9 @@ Gem::Specification.new do |gem|
   gem.name          = "playa"
   gem.version       = Playa::VERSION
   gem.authors       = ["Jeremy Stephens"]
-  gem.email         = ["jeremy.f.stephens@vanderbilt.edu"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.email         = ["viking@pillageandplunder.net"]
+  gem.description   = %q{Playa is a web-based music player. Run it from your library directory to spin up the server.}
+  gem.summary       = %q{Playa is a web-based music player}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($/)
@@ -20,6 +20,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'sinatra'
   gem.add_dependency 'sinatra-contrib'
   gem.add_dependency 'sequel'
+  gem.add_dependency 'sqlite3'
   gem.add_dependency 'mustache'
   gem.add_dependency 'ruby-mp3info'
 end

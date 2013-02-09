@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require "playa"
+Sequel::Migrator.apply(Playa::Database,
+  File.join(File.dirname(__FILE__), "..", "db", "migrate"))
+
+$stderr.print "Discovering music..."
+$stderr.flush
+Playa::Loader.run
+$stderr.puts "done."
+
+Playa::Server.start

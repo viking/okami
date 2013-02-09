@@ -4,7 +4,6 @@ source 'https://rubygems.org'
 gemspec
 
 group :development do
-  gem 'sqlite3'
   gem 'test-unit'
   gem 'rack-test'
   gem 'mocha'
