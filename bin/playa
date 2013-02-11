@@ -9,4 +9,4 @@ $stderr.flush
 Playa::Loader.run
 $stderr.puts "done."
 
-Playa::Server.start
+Rack::Server.new(:app => Playa::Application).start
