@@ -6,6 +6,9 @@ html, body {
 .clear {
   clear: both;
 }
+.hidden {
+  display: none;
+}
 
 #sidebar {
   position: absolute;

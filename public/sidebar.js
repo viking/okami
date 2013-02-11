@@ -18,6 +18,8 @@ function sidebar(target, opts) {
   this.libraryUrl = options.libraryUrl;
   this.target.append(options.searchHtml);
   this.search = this.target.find('input.search');
+  this.target.append('<div class="library"></div>');
+  this.library = this.target.find('.library');
 
   if ('loaded' in options) {
     this.target.bind('loaded', options.loaded);
@@ -54,12 +56,8 @@ function sidebar(target, opts) {
 
   /* setup search */
   this.search.keyup(function(e) {
-    var query = $(this).val();
-    if (query == "") {
-      self.target.find('.open').show();
-    }
-    else {
-      console.log(self.target.find("[data-name*='"+query+"']"));
+    if (e.which == 8 || e.which >= 32) {
+      self.doSearch.call(self, e, this);
     }
   });
 
@@ -70,9 +68,55 @@ $.extend(sidebar.prototype, {
   loadLibrary: function() {
     var self = this;
     $.get(this.libraryUrl, function(data) {
-      self.target.append(data);
+      self.library.append(data);
       self.target.trigger('loaded');
     }, 'html');
+  },
+  doSearch: function(e, input) {
+    var self = this;
+    var query = $(input).val();
+    if (query == "") {
+      self.target.find('.hidden').removeClass('hidden');
+    }
+    else {
+      var re = new RegExp(query, "i");
+      var elts = self.library.find('.artist, .album, .track');
+      var hits = elts.filter(function() {
+        return re.test($(this).data('name'));
+      });
+      var misses = elts.not(hits);
+      var moreHits = $();
+      hits.each(function() {
+        var obj = $(this);
+        var selector;
+        if (obj.hasClass('track')) {
+          obj.closest('.tracks').show();
+          obj.closest('.album').removeClass('closed').addClass('open');
+          obj.closest('.albums').show();
+          obj.closest('.artist').removeClass('closed').addClass('open');
+
+          selector = '.album.album-' + obj.data('album_id') + ', ' +
+            '.artist.artist-' + obj.data('artist_id');
+        }
+        else if (obj.hasClass('album')) {
+          obj.closest('.albums').show();
+          obj.closest('.artist').removeClass('closed').addClass('open');
+
+          selector = '.artist.artist-' + obj.data('artist_id') + ', ' +
+            '.track.album-' + obj.data('id');
+        }
+        else {
+          selector = '.album.artist-' + obj.data('id') +
+            '.track.artist-' + obj.data('id');
+        }
+        var newHits = misses.filter(selector);
+        moreHits = moreHits.add(newHits);
+        misses = misses.not(newHits);
+      });
+      hits.removeClass('hidden');
+      moreHits.removeClass('hidden');
+      misses.addClass('hidden');
+    }
   }
 });
 

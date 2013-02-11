@@ -67,7 +67,8 @@ $(function() {
       }
       else {
         var which = obj.hasClass('artist') ? 'artist' : 'album';
-        var selector = '#sidebar .track.' + which + '-' + obj.data('id');
+        var selector = '#sidebar .track.' + which + '-' + obj.data('id') +
+          ':not(.hidden)';
         tracks = $(selector);
       }
       queueTracks(tracks);
