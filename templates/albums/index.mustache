@@ -1,6 +1,6 @@
 <div class="albums">
 {{#albums}}
-  <div class="album album-{{id}} artist-{{artist_id}}" data-id="{{id}}" data-year="{{year}}" data-name="{{formatted_name}}" data-artist_id="{{artist_id}}">
+  <div class="album album-{{id}} artist-{{artist_id}} {{#include_tracks}}open{{/include_tracks}}{{^include_tracks}}closed{{/include_tracks}}" data-id="{{id}}" data-year="{{year}}" data-name="{{formatted_name}}" data-artist_id="{{artist_id}}">
     {{formatted_name}}
   </div>
   {{#include_tracks}}{{>tracks/index}}{{/include_tracks}}

@@ -16,26 +16,37 @@ html, body {
   overflow: auto;
   border-right: 1px solid gray;
 }
-#sidebar h2 {
+#sidebar div.search {
   text-align: center;
-  font-weight: bold;
-  font-size: 1.2em;
-  padding: 0.5em;
+  margin: 10px auto;
+}
+#sidebar input.search {
+  border: 1px solid black;
 }
 #sidebar .artists {
-  padding: 0 1em 1em 1em;
+  padding: 0 10px 10px 10px;
 }
 #sidebar .albums {
-  padding: 0.3em 0 0 1em;
+  padding: 3px 0 0 10px;
 }
 #sidebar .tracks {
-  padding: 0.3em 0 0 1em;
+  padding: 3px 0 0 10px;
 }
 #sidebar .artist,
 #sidebar .album,
 #sidebar .track {
-  padding: 0.3em;
+  padding: 5px 5px 5px 20px;
   cursor: pointer;
+}
+#sidebar .album,
+#sidebar .track {
+  margin-left: 8px;
+}
+#sidebar .open {
+  background: url('open-arrow.gif') no-repeat left center;
+}
+#sidebar .closed {
+  background: url('closed-arrow.gif') no-repeat left center;
 }
 
 #playlist {
@@ -53,28 +64,28 @@ html, body {
 }
 #playlist .number {
   float: left;
-  width: 2em;
+  width: 4%;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
 }
 #playlist .title {
   float: left;
-  width: 20em;
+  width: 32%;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
 }
 #playlist .artist {
   float: left;
-  width: 20em;
+  width: 32%;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
 }
 #playlist .album {
   float: left;
-  width: 20em;
+  width: 32%;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;

@@ -234,7 +234,7 @@ $.extend(playlist.prototype, {
 $.fn.playlist = function(method) {
   var obj = this.data('playlist');
   if (!obj) {
-    this.data('playlist', new playlist(this, arguments));
+    this.data('playlist', new playlist(this, arguments[0]));
   }
   else if (obj[method]) {
     return obj[method].apply(obj, Array.prototype.slice.call(arguments, 1));
