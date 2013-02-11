@@ -13,78 +13,69 @@ class TestApplication < Test::Unit::TestCase
     assert last_response.ok?
   end
 
-  test "/artists" do
-    artist = stub('artist', :id => 1, :formatted_name => 'foo')
+  test "/library" do
+    track = stub('track', :id => 3, :name => "foo", :number => 1)
+    album = stub('album', {
+      :id => 4, :name => "bar", :year => 1234, :tracks => [track]
+    })
+    artist = stub('artist', :id => 5, :name => "baz", :albums => [album])
     dataset = stub('dataset')
-    Playa::Artist.expects(:order).with(:name).returns(dataset)
+    Playa::Artist.expects(:eager_graph).with(:albums => :tracks).
+      returns(dataset)
+    dataset.expects(:order).
+      with(:artists__name, :albums__year, :albums__name, :tracks__number).
+      returns(dataset)
     dataset.expects(:all).returns([artist])
-    xhr '/artists'
+    xhr '/library'
     assert last_response.ok?
     assert_match %r{^<div}, last_response.body
+  end
+
+  test "/artists" do
+    dataset = stub('dataset')
+    Playa::Artist.expects(:order).with(:name).returns(dataset)
+    dataset.expects(:to_json).returns("foo")
+    xhr '/artists'
+    assert last_response.ok?
+    assert_equal "foo", last_response.body
   end
 
   test "/albums" do
-    album = stub('album', :id => 1, :formatted_name => 'foo', :year => 1234)
     dataset = stub('dataset')
     Playa::Album.expects(:order).with(:year, :name).returns(dataset)
-    dataset.expects(:all).returns([album])
-
+    dataset.expects(:to_json).returns("foo")
     xhr '/albums'
     assert last_response.ok?
-    assert_match %r{^<div}, last_response.body
+    assert_equal "foo", last_response.body
   end
 
   test "/albums?artist_id=1" do
-    album = stub('album', :id => 1, :formatted_name => 'foo', :year => 1234)
     dataset = stub('dataset')
     Playa::Album.expects(:filter).with(:albums__artist_id => '1').returns(dataset)
     dataset.expects(:order).with(:year, :name).returns(dataset)
-    dataset.expects(:all).returns([album])
-
+    dataset.expects(:to_json).returns("foo")
     xhr '/albums', :artist_id => 1
     assert last_response.ok?
-    assert_match %r{^<div}, last_response.body
-  end
-
-  test "/albums?artist_id=1&tracks=true" do
-    track = stub('track', :id => 1, :formatted_name => 'bar', :number => 1)
-    album = stub('album', {
-      :id => 1, :formatted_name => 'foo', :year => 1234, :tracks => [track]
-    })
-    dataset = stub('dataset')
-    Playa::Album.expects(:filter).
-      with(:albums__artist_id => '1').returns(dataset)
-    dataset.expects(:eager_graph).with(:tracks).returns(dataset)
-    dataset.expects(:order).
-      with(:albums__year, :albums__name, :tracks__number).returns(dataset)
-    dataset.expects(:all).returns([album])
-
-    xhr '/albums', :artist_id => 1, :tracks => true
-    assert last_response.ok?
-    assert_match %r{track-1}, last_response.body
+    assert_equal "foo", last_response.body
   end
 
   test "/tracks" do
-    track = stub('track', :id => 1, :formatted_name => 'foo', :number => 1)
     dataset = stub('dataset')
     Playa::Track.expects(:order).with(:number).returns(dataset)
-    dataset.expects(:all).returns([track])
-
+    dataset.expects(:to_json).returns("foo")
     xhr '/tracks'
     assert last_response.ok?
-    assert_match %r{^<div}, last_response.body
+    assert_equal "foo", last_response.body
   end
 
   test "/tracks?album_id=1" do
-    track = stub('track', :id => 1, :formatted_name => 'foo', :number => 1)
     dataset = stub('dataset')
     Playa::Track.expects(:order).with(:number).returns(dataset)
     dataset.expects(:filter).with(:album_id => '1').returns(dataset)
-    dataset.expects(:all).returns([track])
-
+    dataset.expects(:to_json).returns("foo")
     xhr '/tracks', :album_id => 1
     assert last_response.ok?
-    assert_match %r{^<div}, last_response.body
+    assert_equal "foo", last_response.body
   end
 
   test "/tracks/1" do

@@ -8,35 +8,27 @@ var defaults = {
     '</form>' +
   '</div>',
 
-  artistsUrl: '/artists',
-  albumsUrl: '/albums',
-  tracksUrl: '/tracks'
+  libraryUrl: '/library'
 }
 
 function sidebar(target, opts) {
   var self = this;
   this.target = $(target);
   var options = $.extend({}, defaults, opts);
-  this.artistsUrl = options.artistsUrl;
-  this.albumsUrl = options.albumsUrl;
-  this.tracksUrl = options.tracksUrl;
+  this.libraryUrl = options.libraryUrl;
   this.target.append(options.searchHtml);
+  this.search = this.target.find('input.search');
 
-  if ('artistsloaded' in options) {
-    this.target.bind('artistsloaded', options.artistsloaded);
+  if ('loaded' in options) {
+    this.target.bind('loaded', options.loaded);
   }
-  this.albumsloaded = options.albumsloaded;
-  this.tracksloaded = options.tracksloaded;
 
   /* setup interaction */
   this.target.
     on('click', '.artist', function(e) {
       var artist = $(this);
       var albums = artist.next('.albums');
-      if (albums.length == 0) {
-        self.loadAlbums(artist);
-      }
-      else if (artist.hasClass('open')) {
+      if (artist.hasClass('open')) {
         artist.removeClass('open').addClass('closed');
         albums.hide();
       }
@@ -48,10 +40,7 @@ function sidebar(target, opts) {
     on('click', '.album', function(e) {
       var album = $(this);
       var tracks = album.next('.tracks');
-      if (tracks.length == 0) {
-        self.loadTracks(album);
-      }
-      else if (album.hasClass('open')) {
+      if (album.hasClass('open')) {
         album.removeClass('open').addClass('closed');
         tracks.hide();
       }
@@ -63,42 +52,26 @@ function sidebar(target, opts) {
     on('click', '.track', function(e) {
     });
 
-  this.loadArtists();
+  /* setup search */
+  this.search.keyup(function(e) {
+    var query = $(this).val();
+    if (query == "") {
+      self.target.find('.open').show();
+    }
+    else {
+      console.log(self.target.find("[data-name*='"+query+"']"));
+    }
+  });
+
+  this.loadLibrary();
 }
 
 $.extend(sidebar.prototype, {
-  loadArtists: function() {
+  loadLibrary: function() {
     var self = this;
-    $.get(this.artistsUrl, function(data) {
+    $.get(this.libraryUrl, function(data) {
       self.target.append(data);
-      if (self.albumsloaded) {
-        self.target.find('.artist').bind('albumsloaded', self.albumsloaded);
-      }
-      self.target.trigger('artistsloaded');
-    }, 'html');
-  },
-
-  loadAlbums: function(artistElt, includeTracks) {
-    var self = this;
-    var params = {artist_id: artistElt.data('id')};
-    if (includeTracks) {
-      params.tracks = 'true';
-    }
-    $.get(this.albumsUrl, params, function(data) {
-      artistElt.after(data);
-      artistElt.removeClass('closed').addClass('open');
-      if (self.tracksloaded) {
-        artistElt.find('.album').bind('tracksloaded', self.tracksloaded);
-      }
-      artistElt.trigger('albumsloaded');
-    }, 'html');
-  },
-
-  loadTracks: function(albumElt) {
-    $.get(this.tracksUrl, {album_id: albumElt.data('id')}, function(data) {
-      albumElt.after(data);
-      albumElt.removeClass('closed').addClass('open');
-      albumElt.trigger('tracksloaded');
+      self.target.trigger('loaded');
     }, 'html');
   }
 });

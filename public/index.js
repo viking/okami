@@ -34,27 +34,25 @@ function queueTracks(tracks) {
 $(function() {
   var sidebar = $('#sidebar');
   sidebar.sidebar({
-    artistsloaded: function(e) {
+    loaded: function(e) {
       $(this).find('.artist').draggable({
         revert: 'invalid',
         helper: artistHelper,
         appendTo: 'body'
+      }).each(function() {
+        $(this).next('.albums').find('.album').draggable({
+          revert: 'invalid',
+          helper: albumHelper,
+          appendTo: 'body'
+        }).each(function() {
+          $(this).next('.tracks').find('.track').draggable({
+            revert: 'invalid',
+            helper: trackHelper,
+            appendTo: 'body'
+          });
+        });
       });
     },
-    albumsloaded: function(e) {
-      $(this).next('.albums').find('.album').draggable({
-        revert: 'invalid',
-        helper: albumHelper,
-        appendTo: 'body'
-      });
-    },
-    tracksloaded: function(e) {
-      $(this).next('.tracks').find('.track').draggable({
-        revert: 'invalid',
-        helper: trackHelper,
-        appendTo: 'body'
-      });
-    }
   });
 
   var playlist = $('#playlist');
@@ -71,21 +69,6 @@ $(function() {
         var which = obj.hasClass('artist') ? 'artist' : 'album';
         var selector = '#sidebar .track.' + which + '-' + obj.data('id');
         tracks = $(selector);
-        if (tracks.length == 0) {
-          if (which == 'artist') {
-            obj.one('albumsloaded', function(e) {
-              queueTracks($(selector));
-            });
-            sidebar.sidebar('loadAlbums', obj, true);
-          }
-          else {
-            obj.one('tracksloaded', function(e) {
-              queueTracks($(selector));
-            });
-            sidebar.sidebar('loadTracks', obj);
-          }
-          return;
-        }
       }
       queueTracks(tracks);
     }

@@ -14,7 +14,8 @@ module Playa
   Library = ENV['PLAYA_LIBRARY'] || Dir.pwd
   Database = Sequel.connect({
     :adapter => 'sqlite',
-    :database => ENV['PLAYA_DATABASE'] || File.join(Library, 'playa.db')
+    :database => ENV['PLAYA_DATABASE'] || File.join(Library, 'playa.db'),
+    :logger => Logger.new(STDERR)
   })
 
   autoload :Artist, "playa/artist"

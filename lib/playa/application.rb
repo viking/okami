@@ -15,9 +15,14 @@ module Playa
       mustache :index
     end
 
+    get "/library" do
+      @artists = Artist.eager_graph(:albums => :tracks).
+        order(:artists__name, :albums__year, :albums__name, :tracks__number).all
+      mustache :library, :layout => false
+    end
+
     get "/artists" do
-      @artists = Artist.order(:name).all
-      mustache :"artists/index", :layout => false
+      Artist.order(:name).to_json
     end
 
     get "/albums" do
@@ -25,15 +30,7 @@ module Playa
       if params[:artist_id]
         dataset = dataset.filter(:albums__artist_id => params[:artist_id])
       end
-      if params[:tracks] == "true"
-        dataset = dataset.eager_graph(:tracks).
-          order(:albums__year, :albums__name, :tracks__number)
-        @include_tracks = true
-      else
-        dataset = dataset.order(:year, :name)
-      end
-      @albums = dataset.all
-      mustache :"albums/index", :layout => false
+      dataset.order(:year, :name).to_json
     end
 
     get "/tracks" do
@@ -41,8 +38,7 @@ module Playa
       if params[:album_id]
         dataset = dataset.filter(:album_id => params[:album_id])
       end
-      @tracks = dataset.all
-      mustache :"tracks/index", :layout => false
+      dataset.to_json
     end
 
     get "/tracks/:id" do
