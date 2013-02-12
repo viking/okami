@@ -26,33 +26,9 @@ function sidebar(target, opts) {
   }
 
   /* setup interaction */
-  this.target.
-    on('click', '.artist', function(e) {
-      var artist = $(this);
-      var albums = artist.next('.albums');
-      if (artist.hasClass('open')) {
-        artist.removeClass('open').addClass('closed');
-        albums.hide();
-      }
-      else {
-        artist.removeClass('closed').addClass('open');
-        albums.show();
-      }
-    }).
-    on('click', '.album', function(e) {
-      var album = $(this);
-      var tracks = album.next('.tracks');
-      if (album.hasClass('open')) {
-        album.removeClass('open').addClass('closed');
-        tracks.hide();
-      }
-      else {
-        album.removeClass('closed').addClass('open');
-        tracks.show();
-      }
-    }).
-    on('click', '.track', function(e) {
-    });
+  this.target.on('click', '.artist, .album', function(e) {
+    self.toggleNode.call(self, $(this));
+  });
 
   /* setup search */
   this.search.keyup(function(e) {
@@ -72,41 +48,46 @@ $.extend(sidebar.prototype, {
       self.target.trigger('loaded');
     }, 'html');
   },
+
   doSearch: function(e, input) {
     var self = this;
     var query = $(input).val();
     if (query == "") {
-      self.target.find('.hidden').removeClass('hidden');
+      self.library.find('.hidden').removeClass('hidden');
     }
     else {
       var re = new RegExp(query, "i");
-      var elts = self.library.find('.artist, .album, .track');
+      var elts = self.library.find('.artists *');
       var hits = elts.filter(function() {
-        return re.test($(this).data('name'));
+        return($(this).is('.artist, .album, .track') &&
+          re.test($(this).data('name')));
       });
       var misses = elts.not(hits);
       var moreHits = $();
       hits.each(function() {
         var obj = $(this);
-        var selector;
+        var selector, openSelector, albumClass, artistClass;
         if (obj.hasClass('track')) {
-          obj.closest('.tracks').show();
-          obj.closest('.album').removeClass('closed').addClass('open');
-          obj.closest('.albums').show();
-          obj.closest('.artist').removeClass('closed').addClass('open');
-
-          selector = '.album.album-' + obj.data('album_id') + ', ' +
-            '.artist.artist-' + obj.data('artist_id');
+          albumClass = '.album-' + obj.data('album_id');
+          artistClass = '.artist-' + obj.data('artist_id');
+          self.toggleNode(self.library.find('.album' + albumClass), true);
+          self.toggleNode(self.library.find('.artist' + artistClass), true);
+          selector = '.tracks' + albumClass + ', ' +
+            '.album' + albumClass + ', ' +
+            '.albums' + artistClass + ', ' +
+            '.artist' + artistClass;
         }
         else if (obj.hasClass('album')) {
-          obj.closest('.albums').show();
-          obj.closest('.artist').removeClass('closed').addClass('open');
-
-          selector = '.artist.artist-' + obj.data('artist_id') + ', ' +
-            '.track.album-' + obj.data('id');
+          albumClass = '.album-' + obj.data('id');
+          artistClass = '.artist-' + obj.data('artist_id');
+          self.toggleNode(self.library.find('.artist' + artistClass), true);
+          selector = '.track' + albumClass +
+            '.tracks' + albumClass + ', ' +
+            '.albums' + artistClass + ', ' +
+            '.artist' + artistClass;
         }
         else {
-          selector = '.album.artist-' + obj.data('id') +
+          selector = '.album.artist-' + obj.data('id') + ', ' +
             '.track.artist-' + obj.data('id');
         }
         var newHits = misses.filter(selector);
@@ -117,6 +98,21 @@ $.extend(sidebar.prototype, {
       moreHits.removeClass('hidden');
       misses.addClass('hidden');
     }
+  },
+
+  toggleNode: function(parent, openOrClose) {
+    if (typeof(openOrClose) == 'undefined') {
+      openOrClose = parent.hasClass('closed');
+    }
+
+    if (openOrClose) {
+      parent.removeClass('closed').addClass('open');
+    }
+    else {
+      parent.removeClass('open').addClass('closed');
+    }
+    parent.next('.albums').toggle(openOrClose); // if parent is artist
+    parent.next('.tracks').toggle(openOrClose); // if parent is album
   }
 });
 

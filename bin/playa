@@ -9,4 +9,9 @@ $stderr.flush
 Playa::Loader.run
 $stderr.puts "done."
 
-Rack::Server.new(:app => Playa::Application).start
+# set options afterwards, so we can benefit from rack's option parser
+server = Rack::Server.new
+server.options = server.options.merge({
+  :config => File.join(File.dirname(__FILE__), "..", "config.ru")
+})
+server.start
