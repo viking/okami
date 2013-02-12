@@ -4,6 +4,7 @@
 
 var defaults = {
   headerHtml: '<div class="header">' +
+      '<div class="handle"></div>' +
       '<div class="number">#</div>' +
       '<div class="title">Title</div>' +
       '<div class="album">Album</div>' +
@@ -20,6 +21,7 @@ var defaults = {
     '</div>',
 
   trackTemplate: '<div class="track track-{{id}}" data-id="{{id}}" data-url="{{url}}">' +
+      '<div class="handle"></div>' +
       '<div class="number">{{number}}</div>' +
       '<div class="title">{{title}}</div>' +
       '<div class="album">{{album}}</div>' +
@@ -38,7 +40,33 @@ function playlist(target, opts) {
   this.target.append(options.headerHtml);
   this.tracks = $('<div class="tracks"></div>');
   this.target.append(this.tracks);
-  this.tracks.sortable();
+  this.tracks.
+    sortable({handle: '.handle'}).
+    selectable({cancel: '.ui-selected'}).
+    on('dblclick', '.track.ui-selected', function(e) {
+      var dblclicks = $(this).data('dblclicks');
+      if (typeof(dblclicks) == 'undefined') {
+        dblclicks = 0;
+      }
+      $(this).data('dblclicks', dblclicks + 1);
+
+      var pos = self.tracks.find('.track').index(this);
+      if (pos > -1) {
+        self.skipTo(pos);
+      }
+    }).on('click', '.track.ui-selected', function(e) {
+      var obj = $(this);
+      setTimeout(function() {
+        var dblclicks = obj.data('dblclicks');
+        if (dblclicks > 0) {
+          obj.data('dblclicks', dblclicks - 1);
+        }
+        else {
+          obj.removeClass('ui-selected').parents('.ui-selectable').
+            trigger('selectableunselected');
+        }
+      }, 150);
+    });
 
   this.controls = $('<div class="controls"></div>');
   this.controls.append(options.controlsHtml);
@@ -80,7 +108,10 @@ $.extend(playlist.prototype, {
     if (this.state == 'empty') {
       this.setState('ready');
     }
-    this.tracks.append(this.trackTemplate(track));
+    var track = $(this.trackTemplate(track));
+    track.find('div:not(.clear)').attr('unselectable', 'on').
+      css('user-select', 'none').on('selectstart', false);
+    this.tracks.append(track);
   },
 
   trackAt: function(position) {
@@ -139,6 +170,12 @@ $.extend(playlist.prototype, {
       this.position++;
       this.loadSound();
     }
+  },
+
+  skipTo: function(position) {
+    this.deleteSound();
+    this.position = position;
+    this.loadSound();
   },
 
   setState: function(newState) {
@@ -209,12 +246,14 @@ $.extend(playlist.prototype, {
   },
 
   deleteSound: function() {
-    if (this.currentSound.playState) {
-      this.currentSound.stop();
+    if (this.currentSound) {
+      if (this.currentSound.playState) {
+        this.currentSound.stop();
+      }
+      this.currentSound.destruct();
+      this.currentSound = null;
+      this.trackAt(this.position).removeClass('playing paused stopped');
     }
-    this.currentSound.destruct();
-    this.currentSound = null;
-    this.trackAt(this.position).removeClass('playing paused stopped');
     this.setState('ready');
   },
 

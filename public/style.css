@@ -61,52 +61,73 @@ html, body {
   padding: 10px;
   overflow: auto;
 }
-#playlist .header {
-  font-weight: bold;
-  padding-bottom: 0.3em;
+#playlist .number,
+#playlist .title,
+#playlist .album,
+#playlist .artist,
+#playlist .handle {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  height: 2em;
+  line-height: 2em;
+  overflow-x: hidden;
+  overflow-y: visible;
+}
+#playlist .handle {
+  float: left;
+  width: 3%;
+  margin-right: 1%;
 }
 #playlist .number {
   float: left;
-  width: 4%;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  width: 3%;
+  margin-right: 1%;
 }
 #playlist .title {
   float: left;
-  width: 32%;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  width: 30%;
+  margin-right: 1%;
 }
 #playlist .artist {
   float: left;
-  width: 32%;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  width: 30%;
+  margin-right: 1%;
 }
 #playlist .album {
   float: left;
-  width: 32%;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  width: 30%;
+}
+#playlist .header {
+  font-weight: bold;
+  margin-bottom: 3px;
 }
 #playlist .track {
-  padding: 0.3em 0;
+  cursor: pointer;
+  position: relative;
+  margin-bottom: 3px;
 }
-#playlist .playing {
+#playlist .track .handle {
+  background: #ddd url('./handle.gif') no-repeat center;
+}
+#playlist .track.playing {
   color: white;
   background-color: green;
 }
-#playlist .paused {
+#playlist .track.paused {
   color: black;
   background-color: yellow;
 }
-#playlist .stopped {
+#playlist .track.stopped {
   color: white;
   background-color: red;
+}
+#playlist .track.ui-selecting {
+  color: black;
+  background-color: lightblue;
+}
+#playlist .track.ui-selected {
+  color: black;
+  background-color: lightblue;
 }
 
 .controls {
