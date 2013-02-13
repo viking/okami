@@ -18,6 +18,12 @@ var defaults = {
       '<button class="play">Play</button>' +
       '<button class="stop">Stop</button>' +
       '<button class="next">Next</button>' +
+    '</div>' +
+    '<div class="playback">' +
+      '<div class="postime"></div>' +
+      '<div class="seek"></div>' +
+      '<div class="negtime"></div>' +
+      '<div class="clear"></div>' +
     '</div>',
 
   trackTemplate: '<div class="track track-{{id}}" data-id="{{id}}" data-url="{{url}}">' +
@@ -96,6 +102,11 @@ function playlist(target, opts) {
   }).click(function(e) {
     self.next.call(self);
   });
+  this.postime = this.controls.find('.postime');
+  this.seek = this.controls.find('.seek').slider({
+    min: 0, max: 1000, range: "min"
+  });
+  this.negtime = this.controls.find('.negtime');
 
   this.trackTemplate = Mustache.compile(options.trackTemplate);
   this.position = options.position;
@@ -204,7 +215,18 @@ $.extend(playlist.prototype, {
       autoLoad: true,
       volume: 50,
       onload: function() {
+        var duration = this.duration;
+        self.postime.html('0:00');
+        self.seek.slider('option', 'max', duration);
+        self.negtime.html('-' + self.durationToTime(duration));
         self.playSound.call(self, this);
+      },
+      whileplaying: function() {
+        var position = this.position;
+        var duration = this.duration;
+        self.postime.html(self.durationToTime(position));
+        self.seek.slider('value', position);
+        self.negtime.html('-' + self.durationToTime(duration - position));
       }
     });
   },
@@ -242,6 +264,9 @@ $.extend(playlist.prototype, {
   stopSound: function() {
     this.currentSound.stop();
     this.trackAt(this.position).removeClass('playing paused').addClass('stopped');
+    this.postime.html('0:00');
+    this.seek.slider('value', 0);
+    this.negtime.html('-' + this.durationToTime(this.currentSound.duration));
     this.setState('stopped');
   },
 
@@ -253,6 +278,9 @@ $.extend(playlist.prototype, {
       this.currentSound.destruct();
       this.currentSound = null;
       this.trackAt(this.position).removeClass('playing paused stopped');
+      this.postime.html('');
+      this.seek.slider('value', 0);
+      this.negtime.html('');
     }
     this.setState('ready');
   },
@@ -267,6 +295,28 @@ $.extend(playlist.prototype, {
     else {
       this.loadSound();
     }
+  },
+
+  durationToTime: function(duration) {
+    var totalSeconds = Math.round(duration / 1000);
+    var seconds = totalSeconds % 60;
+    var totalMinutes = Math.floor(totalSeconds / 60);
+    var minutes = totalMinutes % 60;
+    var hours = Math.floor(totalMinutes / 60);
+
+    var result = '';
+    if (hours > 0) {
+      result += hours + ':';
+      if (minutes < 10) {
+        result += '0';
+      }
+    }
+    result += minutes + ':';
+    if (seconds < 10) {
+      result += '0'
+    }
+    result += seconds;
+    return(result);
   }
 });
 

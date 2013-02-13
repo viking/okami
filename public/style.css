@@ -140,5 +140,28 @@ html, body {
 }
 .controls .buttons {
   text-align: center;
-  margin-top: 25px;
+  margin-top: 10px;
+  height: 40px;
+}
+.controls .playback {
+  position: relative;
+  margin-top: 10px;
+  height: 40px;
+}
+.controls .playback .postime {
+  position: absolute;
+  left: 10px;
+  width: 100px;
+  text-align: right;
+}
+.controls .playback .seek {
+  position: absolute;
+  left: 125px;
+  right: 125px;
+}
+.controls .playback .negtime {
+  position: absolute;
+  right: 10px;
+  width: 100px;
+  text-align: left;
 }
