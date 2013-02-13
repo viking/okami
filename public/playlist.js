@@ -103,8 +103,20 @@ function playlist(target, opts) {
     self.next.call(self);
   });
   this.postime = this.controls.find('.postime');
-  this.seek = this.controls.find('.seek').slider({
-    min: 0, max: 1000, range: "min"
+  this.seekSlider = this.controls.find('.seek').slider({
+    min: 0, max: 1000, range: "min",
+    start: function(e, ui) {
+      self.startSeek.call(self);
+    },
+    stop: function(e, ui) {
+      self.stopSeek.call(self, ui.value);
+    },
+    slide: function(e, ui) {
+      self.refreshTimes.call(self);
+    },
+    change: function(e, ui) {
+      self.refreshTimes.call(self);
+    }
   });
   this.negtime = this.controls.find('.negtime');
 
@@ -169,6 +181,18 @@ $.extend(playlist.prototype, {
     }
   },
 
+  pause: function() {
+    if (this.state == 'playing') {
+      this.pauseSound();
+    }
+  },
+
+  resume: function() {
+    if (this.state == 'paused') {
+      this.resumeSound();
+    }
+  },
+
   stop: function() {
     if (this.state == 'playing' || this.state == 'paused') {
       this.stopSound();
@@ -200,6 +224,7 @@ $.extend(playlist.prototype, {
         primary: 'ui-icon-pause'
       });
     }
+    this.previousState = this.state;
     this.state = newState;
   },
 
@@ -217,16 +242,12 @@ $.extend(playlist.prototype, {
       onload: function() {
         var duration = this.duration;
         self.postime.html('0:00');
-        self.seek.slider('option', 'max', duration);
+        self.seekSlider.slider('option', 'max', duration);
         self.negtime.html('-' + self.durationToTime(duration));
         self.playSound.call(self, this);
       },
       whileplaying: function() {
-        var position = this.position;
-        var duration = this.duration;
-        self.postime.html(self.durationToTime(position));
-        self.seek.slider('value', position);
-        self.negtime.html('-' + self.durationToTime(duration - position));
+        self.seekSlider.slider('value', this.position);
       }
     });
   },
@@ -264,9 +285,7 @@ $.extend(playlist.prototype, {
   stopSound: function() {
     this.currentSound.stop();
     this.trackAt(this.position).removeClass('playing paused').addClass('stopped');
-    this.postime.html('0:00');
-    this.seek.slider('value', 0);
-    this.negtime.html('-' + this.durationToTime(this.currentSound.duration));
+    this.seekSlider.slider('value', 0);
     this.setState('stopped');
   },
 
@@ -278,9 +297,7 @@ $.extend(playlist.prototype, {
       this.currentSound.destruct();
       this.currentSound = null;
       this.trackAt(this.position).removeClass('playing paused stopped');
-      this.postime.html('');
-      this.seek.slider('value', 0);
-      this.negtime.html('');
+      this.seekSlider.slider('value', 0);
     }
     this.setState('ready');
   },
@@ -294,6 +311,45 @@ $.extend(playlist.prototype, {
     }
     else {
       this.loadSound();
+    }
+  },
+
+  refreshTimes: function() {
+    if (this.currentSound) {
+      var position = this.seekSlider.slider('option', 'value');
+      var duration = this.seekSlider.slider('option', 'max');
+      this.postime.html(this.durationToTime(position));
+      this.negtime.html('-' + this.durationToTime(duration - position));
+    }
+    else {
+      this.postime.html('');
+      this.negtime.html('');
+    }
+  },
+
+  startSeek: function() {
+    if (this.currentSound) {
+      if (this.state == 'playing') {
+        this.currentSound.pause();
+      }
+      this.setState('seeking');
+    }
+  },
+
+  stopSeek: function(position) {
+    var self = this;
+    if (this.state == 'seeking') {
+      if (self.previousState == 'playing') {
+        // This function triggers after the new position actually
+        // takes effect. It's not instantaneous, evidently.
+        var positionCallback = function(eventPosition) {
+          this.clearOnPosition(0, positionCallback);
+          this.resume();
+        };
+        this.currentSound.onPosition(0, positionCallback);
+      }
+      this.currentSound.setPosition(position);
+      self.setState(this.previousState);
     }
   },
 
