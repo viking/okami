@@ -31,13 +31,15 @@ module Okami
     end
 
     def run
-      marked = Track.select_map(:id)
-      unmark = traverse(@root)
-      marked -= unmark
+      Database.transaction do
+        marked = Track.select_map(:id)
+        unmark = traverse(@root)
+        marked -= unmark
 
-      Track.filter(:id => marked).each(&:destroy)
-      Album.orphaned.each(&:destroy)
-      Artist.orphaned.each(&:destroy)
+        Track.filter(:id => marked).each(&:destroy)
+        Album.orphaned.each(&:destroy)
+        Artist.orphaned.each(&:destroy)
+      end
     end
 
     def traverse(dir)
