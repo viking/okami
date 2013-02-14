@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in playa.gemspec
+# Specify your gem's dependencies in okami.gemspec
 gemspec
 
 group :development do

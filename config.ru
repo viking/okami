@@ -3,5 +3,5 @@ require 'bundler'
 
 Bundler.require
 
-require './lib/playa'
-run Playa::Application
+require './lib/okami'
+run Okami::Application

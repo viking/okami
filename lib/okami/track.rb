@@ -1,4 +1,4 @@
-module Playa
+module Okami
   class Track < Sequel::Model
     plugin :timestamps, :update_on_create => true
 

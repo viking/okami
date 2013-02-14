@@ -3,7 +3,7 @@ require "rake/testtask"
 
 task :environment, :env do |cmd, args|
   ENV["RACK_ENV"] = args[:env] || "development"
-  require "./lib/playa"
+  require "./lib/okami"
 end
 
 Rake::TestTask.new do |t|
@@ -19,7 +19,7 @@ namespace :db do
     Rake::Task['environment'].invoke(env)
 
     unless Dir.glob("db/migrate/*.rb").empty?
-      Sequel::Migrator.apply(Playa::Database, "db/migrate")
+      Sequel::Migrator.apply(Okami::Database, "db/migrate")
     end
   end
 
@@ -29,8 +29,8 @@ namespace :db do
     Rake::Task['environment'].invoke(env)
 
     unless Dir.glob("db/migrate/*.rb").empty?
-      version = (row = Playa::Database[:schema_info].first) ? row[:version] : nil
-      Sequel::Migrator.apply(Playa::Database, "db/migrate", version - 1)
+      version = (row = Okami::Database[:schema_info].first) ? row[:version] : nil
+      Sequel::Migrator.apply(Okami::Database, "db/migrate", version - 1)
     end
   end
 
@@ -39,8 +39,8 @@ namespace :db do
     env = args[:env] || "development"
     Rake::Task['environment'].invoke(env)
 
-    Playa::Database.tables.each do |table|
-      Playa::Database.run("DROP TABLE #{table}")
+    Okami::Database.tables.each do |table|
+      Okami::Database.run("DROP TABLE #{table}")
     end
   end
 

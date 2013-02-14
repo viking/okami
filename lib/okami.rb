@@ -8,24 +8,24 @@ require 'yaml'
 require 'pathname'
 require 'logger'
 
-module Playa
+module Okami
   Root = (Pathname.new(File.dirname(__FILE__)) + '..').expand_path
   Env = ENV['RACK_ENV'] || 'development'
-  Library = ENV['PLAYA_LIBRARY'] || Dir.pwd
+  Library = ENV['OKAMI_LIBRARY'] || Dir.pwd
   Database = Sequel.connect({
     :adapter => 'sqlite',
-    :database => ENV['PLAYA_DATABASE'] || File.join(Library, 'playa.db'),
+    :database => ENV['OKAMI_DATABASE'] || File.join(Library, 'okami.db'),
     :logger => Logger.new(STDERR)
   })
 
-  autoload :Artist, "playa/artist"
-  autoload :Album, "playa/album"
-  autoload :Track, "playa/track"
+  autoload :Artist, "okami/artist"
+  autoload :Album, "okami/album"
+  autoload :Track, "okami/track"
 end
 Sequel::Model.plugin :json_serializer
 Sequel.extension :migration
 
-require "playa/version"
-require "playa/loader"
-require "playa/views"
-require "playa/application"
+require "okami/version"
+require "okami/loader"
+require "okami/views"
+require "okami/application"

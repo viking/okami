@@ -1,15 +1,15 @@
 # -*- encoding: utf-8 -*-
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'playa/version'
+require 'okami/version'
 
 Gem::Specification.new do |gem|
-  gem.name          = "playa"
-  gem.version       = Playa::VERSION
+  gem.name          = "okami"
+  gem.version       = Okami::VERSION
   gem.authors       = ["Jeremy Stephens"]
   gem.email         = ["viking@pillageandplunder.net"]
-  gem.description   = %q{Playa is a web-based music player. Run it from your library directory to spin up the server.}
-  gem.summary       = %q{Playa is a web-based music player}
+  gem.description   = %q{Okami is a web-based music player. Run it from your library directory to spin up the server.}
+  gem.summary       = %q{Okami is a web-based music player}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($/)

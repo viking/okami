@@ -1,4 +1,4 @@
-module Playa
+module Okami
   class Application < Sinatra::Base
     register Mustache::Sinatra
     helpers Sinatra::Streaming
@@ -6,8 +6,8 @@ module Playa
     set :root, Root.to_s
     set :mustache, {
       :templates => (Root + 'templates').to_s,
-      :views => (Root + 'lib' + 'playa' + 'views').to_s,
-      :namespace => Playa
+      :views => (Root + 'lib' + 'okami' + 'views').to_s,
+      :namespace => Okami
     }
     enable :reload_templates if development?
 

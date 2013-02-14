@@ -1,4 +1,4 @@
-module Playa
+module Okami
   module Views
     class Index < Mustache
       def playlist_row_template

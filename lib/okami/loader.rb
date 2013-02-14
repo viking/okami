@@ -1,4 +1,4 @@
-module Playa
+module Okami
   class Loader
     class Info
       attr_reader :artist, :album, :track

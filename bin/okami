@@ -1,12 +1,13 @@
 #!/usr/bin/env ruby
 
-require "playa"
-Sequel::Migrator.apply(Playa::Database,
+require "okami"
+
+Sequel::Migrator.apply(Okami::Database,
   File.join(File.dirname(__FILE__), "..", "db", "migrate"))
 
 $stderr.print "Discovering music..."
 $stderr.flush
-Playa::Loader.run
+Okami::Loader.run
 $stderr.puts "done."
 
 # set options afterwards, so we can benefit from rack's option parser

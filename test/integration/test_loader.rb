@@ -2,8 +2,8 @@ require 'helper'
 
 class TestLoader < Test::Unit::TestCase
   def self.const_missing(name)
-    if Playa.const_defined?(name)
-      Playa.const_get(name)
+    if Okami.const_defined?(name)
+      Okami.const_get(name)
     else
       super
     end

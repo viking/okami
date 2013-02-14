@@ -1,4 +1,4 @@
-module Playa
+module Okami
   module Views
     class Layout < Mustache
     end

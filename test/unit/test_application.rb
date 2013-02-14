@@ -5,7 +5,7 @@ class TestApplication < Test::Unit::TestCase
   include XhrHelper
 
   def app
-    Playa::Application
+    Okami::Application
   end
 
   test "/" do
@@ -20,7 +20,7 @@ class TestApplication < Test::Unit::TestCase
     })
     artist = stub('artist', :id => 5, :name => "baz", :albums => [album])
     dataset = stub('dataset')
-    Playa::Artist.expects(:eager_graph).with(:albums => :tracks).
+    Okami::Artist.expects(:eager_graph).with(:albums => :tracks).
       returns(dataset)
     dataset.expects(:order).
       with(:artists__name, :albums__year, :albums__name, :tracks__number).
@@ -33,7 +33,7 @@ class TestApplication < Test::Unit::TestCase
 
   test "/artists" do
     dataset = stub('dataset')
-    Playa::Artist.expects(:order).with(:name).returns(dataset)
+    Okami::Artist.expects(:order).with(:name).returns(dataset)
     dataset.expects(:to_json).returns("foo")
     xhr '/artists'
     assert last_response.ok?
@@ -42,7 +42,7 @@ class TestApplication < Test::Unit::TestCase
 
   test "/albums" do
     dataset = stub('dataset')
-    Playa::Album.expects(:order).with(:year, :name).returns(dataset)
+    Okami::Album.expects(:order).with(:year, :name).returns(dataset)
     dataset.expects(:to_json).returns("foo")
     xhr '/albums'
     assert last_response.ok?
@@ -51,7 +51,7 @@ class TestApplication < Test::Unit::TestCase
 
   test "/albums?artist_id=1" do
     dataset = stub('dataset')
-    Playa::Album.expects(:filter).with(:albums__artist_id => '1').returns(dataset)
+    Okami::Album.expects(:filter).with(:albums__artist_id => '1').returns(dataset)
     dataset.expects(:order).with(:year, :name).returns(dataset)
     dataset.expects(:to_json).returns("foo")
     xhr '/albums', :artist_id => 1
@@ -61,7 +61,7 @@ class TestApplication < Test::Unit::TestCase
 
   test "/tracks" do
     dataset = stub('dataset')
-    Playa::Track.expects(:order).with(:number).returns(dataset)
+    Okami::Track.expects(:order).with(:number).returns(dataset)
     dataset.expects(:to_json).returns("foo")
     xhr '/tracks'
     assert last_response.ok?
@@ -70,7 +70,7 @@ class TestApplication < Test::Unit::TestCase
 
   test "/tracks?album_id=1" do
     dataset = stub('dataset')
-    Playa::Track.expects(:order).with(:number).returns(dataset)
+    Okami::Track.expects(:order).with(:number).returns(dataset)
     dataset.expects(:filter).with(:album_id => '1').returns(dataset)
     dataset.expects(:to_json).returns("foo")
     xhr '/tracks', :album_id => 1
@@ -83,7 +83,7 @@ class TestApplication < Test::Unit::TestCase
       :id => 1, :formatted_name => 'foo', :number => 1,
       :filename => "/foo/bar/foo.mp3"
     })
-    Playa::Track.expects(:[]).with(:id => '1').returns(track)
+    Okami::Track.expects(:[]).with(:id => '1').returns(track)
     IO.expects(:copy_stream).
       with("/foo/bar/foo.mp3", instance_of(Sinatra::Helpers::Stream))
 

@@ -9,7 +9,7 @@ rescue Bundler::BundlerError => e
 end
 
 ENV['RACK_ENV'] = 'test'
-ENV['PLAYA_DATABASE'] = File.join(File.dirname(__FILE__), "..", "db", "test.db")
+ENV['OKAMI_DATABASE'] = File.join(File.dirname(__FILE__), "..", "db", "test.db")
 
 require 'test/unit'
 require 'mocha/setup'
@@ -21,7 +21,10 @@ require 'fileutils'
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-require 'playa'
+require 'okami'
+
+Sequel::Migrator.apply(Okami::Database,
+  File.join(File.dirname(__FILE__), "..", "db", "migrate"))
 
 class SequenceHelper
   def initialize(name)
