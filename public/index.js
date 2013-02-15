@@ -32,8 +32,8 @@ function queueTracks(tracks) {
   });
 }
 $(function() {
-  var sidebar = $('#sidebar');
-  sidebar.sidebar({
+  var library = $('#library');
+  library.library({
     loaded: function(e) {
       $(this).find('.artist').draggable({
         revert: 'invalid',
@@ -58,7 +58,7 @@ $(function() {
   var playlist = $('#playlist');
   playlist.playlist();
   playlist.droppable({
-    accept: '#sidebar .artist, #sidebar .album, #sidebar .track',
+    accept: '#library .artist, #library .album, #library .track',
     drop: function(e, ui) {
       var obj = ui.draggable;
       var tracks;
@@ -67,7 +67,7 @@ $(function() {
       }
       else {
         var which = obj.hasClass('artist') ? 'artist' : 'album';
-        var selector = '#sidebar .track.' + which + '-' + obj.data('id') +
+        var selector = '#library .track.' + which + '-' + obj.data('id') +
           ':not(.hidden)';
         tracks = $(selector);
       }

@@ -16,9 +16,12 @@ module Okami
     end
 
     get "/library" do
-      @artists = Artist.eager_graph(:albums => :tracks).
-        order(:artists__name, :albums__year, :albums__name, :tracks__number).all
-      mustache :library, :layout => false
+      ds = Artist.eager_graph(:albums => :tracks).
+        order(:artists__name, :albums__year, :albums__name, :tracks__number)
+      ds.to_json({
+        :include => {:albums => {:include => :tracks}},
+        :root => :collection
+      })
     end
 
     get "/artists" do

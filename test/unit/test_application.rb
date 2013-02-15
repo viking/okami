@@ -25,10 +25,13 @@ class TestApplication < Test::Unit::TestCase
     dataset.expects(:order).
       with(:artists__name, :albums__year, :albums__name, :tracks__number).
       returns(dataset)
-    dataset.expects(:all).returns([artist])
+    dataset.expects(:to_json).with({
+      :include => {:albums => {:include => :tracks}},
+      :root => :collection
+    }).returns("foo")
     xhr '/library'
     assert last_response.ok?
-    assert_match %r{^<div}, last_response.body
+    assert_equal "foo", last_response.body
   end
 
   test "/artists" do

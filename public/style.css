@@ -10,7 +10,7 @@ html, body {
   display: none;
 }
 
-#sidebar {
+#library {
   position: absolute;
   top: 0px;
   left: 0px;
@@ -19,36 +19,36 @@ html, body {
   overflow: auto;
   border-right: 1px solid gray;
 }
-#sidebar div.search {
+#library div.search {
   text-align: center;
   margin: 10px auto;
 }
-#sidebar input.search {
+#library input.search {
   border: 1px solid black;
 }
-#sidebar .artists {
+#library .artists {
   padding: 0 10px 10px 10px;
 }
-#sidebar .albums {
+#library .albums {
   padding: 3px 0 0 10px;
 }
-#sidebar .tracks {
+#library .tracks {
   padding: 3px 0 0 10px;
 }
-#sidebar .artist,
-#sidebar .album,
-#sidebar .track {
+#library .artist,
+#library .album,
+#library .track {
   padding: 5px 5px 5px 20px;
   cursor: pointer;
 }
-#sidebar .album,
-#sidebar .track {
+#library .album,
+#library .track {
   margin-left: 8px;
 }
-#sidebar .open {
+#library .open {
   background: url('open-arrow.gif') no-repeat left center;
 }
-#sidebar .closed {
+#library .closed {
   background: url('closed-arrow.gif') no-repeat left center;
 }
 
