@@ -1,25 +1,31 @@
 (function($) {
 
 var defaults = {
-  template: '<div class="artists">' +
-    '{{#artists}}' +
-      '<div class="artist artist-{{id}} closed" data-id="{{id}}" data-name="{{#name}}{{name}}{{/name}}{{^name}}Unknown{{/name}}">{{#name}}{{name}}{{/name}}{{^name}}Unknown{{/name}}</div>' +
-      '<div class="albums artist-{{id}}" style="display: none;">' +
+  template:
+  '<div class="artists">' +
+  '{{#artists}}' +
+    '<div class="artist artist-{{id}} closed" data-id="{{id}}" data-name="{{#name}}{{name}}{{/name}}{{^name}}Unknown{{/name}}">' +
+      '<div class="name">{{#name}}{{name}}{{/name}}{{^name}}Unknown{{/name}}</div>' +
+      '<div class="albums artist-{{id}}">' +
       '{{#albums}}' +
         '<div class="album album-{{id}} artist-{{artist_id}} closed" data-id="{{id}}" data-year="{{year}}" data-name="{{#name}}{{name}}{{/name}}{{^name}}Unknown{{/name}}" data-artist_id="{{artist_id}}">' +
-          '{{#name}}{{name}}{{/name}}{{^name}}Unknown{{/name}}' +
-        '</div>' +
-        '<div class="tracks album-{{id}}" style="display: none;">' +
-        '{{#tracks}}' +
-          '<div class="track track-{{id}} album-{{album_id}} artist-{{artist_id}}" data-id="{{id}}" data-number="{{number}}" data-name="{{#name}}{{name}}{{/name}}{{^name}}Unknown{{/name}}" data-artist_id="{{artist_id}}" data-album_id="{{album_id}}">{{#name}}{{name}}{{/name}}{{^name}}Unknown{{/name}}</div>' +
-        '{{/tracks}}' +
+          '<div class="name">{{#name}}{{name}}{{/name}}{{^name}}Unknown{{/name}}</div>' +
+          '<div class="tracks album-{{id}}">' +
+          '{{#tracks}}' +
+            '<div class="track track-{{id}} album-{{album_id}} artist-{{artist_id}}" data-id="{{id}}" data-number="{{number}}" data-name="{{#name}}{{name}}{{/name}}{{^name}}Unknown{{/name}}" data-artist_id="{{artist_id}}" data-album_id="{{album_id}}">' +
+              '<div class="name">{{#name}}{{name}}{{/name}}{{^name}}Unknown{{/name}}</div>' +
+            '</div>' +
+          '{{/tracks}}' +
+          '</div>' +
         '</div>' +
       '{{/albums}}' +
       '</div>' +
-    '{{/artists}}' +
-    '</div>',
+    '</div>' +
+  '{{/artists}}' +
+  '</div>',
 
-  searchHtml: '<div class="search">' +
+  searchHtml:
+  '<div class="search">' +
     '<form>' +
       '<label for="search">Search:</label>' +
       '<input id="search" class="search" type="text" name="search" />' +
@@ -27,7 +33,7 @@ var defaults = {
   '</div>',
 
   url: '/library'
-}
+};
 
 function library(target, opts) {
   var self = this;
@@ -66,9 +72,6 @@ $.extend(library.prototype, {
   loadLibrary: function() {
     var self = this;
     $.get(this.url, function(data) {
-      data.artists = data['okami/artists'];
-      delete data['okami/artists'];
-
       self.data = data;
       self.library.append(Mustache.render(self.template, data));
       self.createIndex();

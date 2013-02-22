@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Okami</title>
+    <link rel="stylesheet" type="text/css" href="/reset.css" />
+    <link rel="stylesheet" type="text/css" href="/smoothness/jquery-ui.css" />
+    <link rel="stylesheet" type="text/css" href="/style.css" />
+    <script type="text/javascript" src="/jquery.js"></script>
+    <script type="text/javascript" src="/jquery-ui.js"></script>
+    <script type="text/javascript" src="/underscore.js"></script>
+    <script type="text/javascript" src="/json2.js"></script>
+    <script type="text/javascript" src="/backbone.js"></script>
+    <script type="text/javascript" src="/soundmanager2.js"></script>
+    <script type="text/javascript" src="/application.js"></script>
+  </head>
+  <body>
+    <div id="library">
+    </div>
+    <div id="playlist">
+      <div class="header">
+        <div class="check"></div>
+        <div class="handle"></div>
+        <div class="number">#</div>
+        <div class="name">Title</div>
+        <div class="album">Album</div>
+        <div class="artist">Artist</div>
+        <div class="clear"></div>
+      </div>
+      <div class="tracks"></div>
+    </div>
+    <div id="controls">
+      <div class="buttons">
+        <button class="sweep">Clear</button>
+        <button class="prev">Previous</button>
+        <button class="play">Play</button>
+        <button class="stop">Stop</button>
+        <button class="next">Next</button>
+      </div>
+      <div class="playback">
+        <div class="postime"></div>
+        <div class="seek"></div>
+        <div class="negtime"></div>
+        <div class="clear"></div>
+      </div>
+    </div>
+    <script id="artist-template" type="text/template">
+      <div class="top">
+        <button class="toggle"></button>
+        <div class="name"><%= name ? name : "Unknown" %></div>
+      </div>
+      <div class="albums"></div>
+    </script>
+    <script id="album-template" type="text/template">
+      <div class="top">
+        <button class="toggle"></button>
+        <div class="name"><%= name ? name : "Unknown" %></div>
+      </div>
+      <div class="tracks"></div>
+    </script>
+    <script id="track-template" type="text/template">
+      <div class="name"><%= name ? name : "Unknown" %></div>
+    </script>
+    <script id="playlist-track-template" type="text/template">
+      <div class="check"></div>
+      <div class="handle"></div>
+      <div class="number"><%= number %></div>
+      <div class="name"><%= name %></div>
+      <div class="album"><%= album %></div>
+      <div class="artist"><%= artist %></div>
+      <div class="clear"></div>
+    </script>
+  </body>
+</html>

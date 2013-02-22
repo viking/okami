@@ -26,8 +26,7 @@ class TestApplication < Test::Unit::TestCase
       with(:artists__name, :albums__year, :albums__name, :tracks__number).
       returns(dataset)
     dataset.expects(:to_json).with({
-      :include => {:albums => {:include => :tracks}},
-      :root => :collection
+      :include => {:albums => {:include => :tracks}}
     }).returns("foo")
     xhr '/library'
     assert last_response.ok?
@@ -43,6 +42,16 @@ class TestApplication < Test::Unit::TestCase
     assert_equal "foo", last_response.body
   end
 
+  test "/artists/1" do
+    artist = stub('artist', :id => 1, :name => 'foo')
+    Okami::Artist.expects(:[]).with(:id => '1').returns(artist)
+    artist.expects(:to_json).returns("huge")
+
+    xhr '/artists/1'
+    assert last_response.ok?
+    assert_equal "huge", last_response.body
+  end
+
   test "/albums" do
     dataset = stub('dataset')
     Okami::Album.expects(:order).with(:year, :name).returns(dataset)
@@ -52,14 +61,27 @@ class TestApplication < Test::Unit::TestCase
     assert_equal "foo", last_response.body
   end
 
-  test "/albums?artist_id=1" do
+  test "/artists/1/albums" do
+    artist = stub('artist', :id => 1, :name => 'foo')
+    Okami::Artist.expects(:[]).with(:id => '1').returns(artist)
     dataset = stub('dataset')
-    Okami::Album.expects(:filter).with(:albums__artist_id => '1').returns(dataset)
+    artist.expects(:albums_dataset).returns(dataset)
     dataset.expects(:order).with(:year, :name).returns(dataset)
     dataset.expects(:to_json).returns("foo")
-    xhr '/albums', :artist_id => 1
+
+    xhr '/artists/1/albums'
     assert last_response.ok?
     assert_equal "foo", last_response.body
+  end
+
+  test "/albums/1" do
+    album = stub('album', :id => 1, :name => 'foo')
+    Okami::Album.expects(:[]).with(:id => '1').returns(album)
+    album.expects(:to_json).returns("huge")
+
+    xhr '/albums/1'
+    assert last_response.ok?
+    assert_equal "huge", last_response.body
   end
 
   test "/tracks" do
@@ -71,17 +93,30 @@ class TestApplication < Test::Unit::TestCase
     assert_equal "foo", last_response.body
   end
 
-  test "/tracks?album_id=1" do
+  test "/albums/1/tracks" do
+    album = stub('album', :id => 1, :name => 'foo')
+    Okami::Album.expects(:[]).with(:id => '1').returns(album)
     dataset = stub('dataset')
-    Okami::Track.expects(:order).with(:number).returns(dataset)
-    dataset.expects(:filter).with(:album_id => '1').returns(dataset)
+    album.expects(:tracks_dataset).returns(dataset)
+    dataset.expects(:order).with(:number).returns(dataset)
     dataset.expects(:to_json).returns("foo")
-    xhr '/tracks', :album_id => 1
+
+    xhr '/albums/1/tracks'
     assert last_response.ok?
     assert_equal "foo", last_response.body
   end
 
   test "/tracks/1" do
+    track = stub('track', :id => 1, :name => 'foo')
+    Okami::Track.expects(:[]).with(:id => '1').returns(track)
+    track.expects(:to_json).returns("huge")
+
+    xhr '/tracks/1'
+    assert last_response.ok?
+    assert_equal "huge", last_response.body
+  end
+
+  test "/tracks/1/stream" do
     track = stub('track', {
       :id => 1, :formatted_name => 'foo', :number => 1,
       :filename => "/foo/bar/foo.mp3"
@@ -90,7 +125,7 @@ class TestApplication < Test::Unit::TestCase
     IO.expects(:copy_stream).
       with("/foo/bar/foo.mp3", instance_of(Sinatra::Helpers::Stream))
 
-    xhr '/tracks/1'
+    xhr '/tracks/1/stream'
     assert last_response.ok?
   end
 end
