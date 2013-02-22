@@ -21,6 +21,5 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'sinatra-contrib'
   gem.add_dependency 'sequel'
   gem.add_dependency 'sqlite3'
-  gem.add_dependency 'mustache'
   gem.add_dependency 'ruby-mp3info'
 end
