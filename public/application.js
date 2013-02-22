@@ -532,6 +532,14 @@ $(function() {
       }
     },
 
+    clear: function() {
+      var track = this.currentTrack();
+      if (track) {
+        track.kill();
+      }
+      this.queue.update([]);
+    },
+
     startSeek: function(e, ui) {
       if (this.state == 'playing') {
         var track = this.currentTrack();
@@ -587,6 +595,7 @@ $(function() {
       'click .stop': 'stop',
       'click .prev': 'prev',
       'click .next': 'next',
+      'click .sweep': 'clear',
       'slide .seek': 'updateTimes',
       'slidechange .seek': 'updateTimes'
     },
@@ -640,6 +649,10 @@ $(function() {
 
     prev: function() {
       this.playlist.play(-1);
+    },
+
+    clear: function() {
+      this.playlist.clear();
     },
 
     played: function() {
