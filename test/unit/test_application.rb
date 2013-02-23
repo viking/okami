@@ -128,4 +128,14 @@ class TestApplication < Test::Unit::TestCase
     xhr '/tracks/1/stream'
     assert last_response.ok?
   end
+
+  test "/discover" do
+    pend
+    seq = SequenceHelper.new('discover')
+    seq << Thread.expects(:new).yields
+    seq << Okami::Loader.expects(:run)
+
+    xhr '/discover'
+    assert last_response.ok?
+  end
 end

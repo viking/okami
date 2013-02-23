@@ -28,7 +28,7 @@ Sequel::Migrator.apply(Okami::Database,
 
 class SequenceHelper
   def initialize(name)
-    @seq = sequence(name)
+    @seq = Mocha::Sequence.new(name)
   end
 
   def <<(expectation)

@@ -1,6 +1,5 @@
 require 'sinatra/base'
 require 'sinatra/streaming'
-require 'mustache/sinatra'
 require 'sequel'
 require 'mp3info'
 require 'erb'
@@ -27,5 +26,4 @@ Sequel.extension :migration
 
 require "okami/version"
 require "okami/loader"
-require "okami/views"
 require "okami/application"

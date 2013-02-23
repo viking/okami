@@ -3,6 +3,7 @@ module Okami
     helpers Sinatra::Streaming
 
     set :root, Root.to_s
+    set :discover_thread, nil
 
     get "/" do
       send_file File.join(settings.views, 'index.html')
@@ -56,6 +57,15 @@ module Okami
       track = Track[:id => params[:id]]
       stream do |out|
         IO.copy_stream(track.filename, out)
+      end
+    end
+
+    get "/discover" do
+      if settings.discover_thread.nil?
+        thread = Thread.new do
+          Okami::Loader.run
+        end
+        settings.discover_thread = thread
       end
     end
   end
