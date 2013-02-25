@@ -16,7 +16,7 @@ group :development do
   gem 'guard-rack'
   gem 'guard-bundler'
   gem 'guard-shell'
-  gem 'rb-inotify', '~> 0.8.8', :require => false
+  gem 'rb-inotify', '~> 0.9', :require => false
   gem 'rb-fsevent', :require => false
   gem 'rb-fchange', :require => false
   gem 'wdm', :platforms => [:mswin, :mingw], :require => false
