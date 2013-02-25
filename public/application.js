@@ -81,6 +81,7 @@ $(function() {
         autoLoad: false,
         autoPlay: false,
         stream: true,
+        volume: Track.volume,
         whileplaying: _.bind(this.tick, this),
         onplay: _.bind(this.trigger, this, 'play'),
         onpause: _.bind(this.trigger, this, 'pause'),
@@ -131,6 +132,12 @@ $(function() {
       }
     },
 
+    setVolume: function(volume) {
+      if (this.sound) {
+        this.sound.setVolume(volume);
+      }
+    },
+
     tick: function() {
       this.trigger('tick', this.sound.position, this.sound.duration);
     },
@@ -147,6 +154,7 @@ $(function() {
       }
     }
   });
+  Track.volume = 60;
 
   TrackList = Backbone.Collection.extend({
     model: Track,
@@ -540,6 +548,14 @@ $(function() {
       this.queue.update([]);
     },
 
+    setVolume: function(volume) {
+      var track = this.currentTrack();
+      if (track) {
+        track.setVolume(volume);
+      }
+      Track.volume = volume;
+    },
+
     startSeek: function(e, ui) {
       if (this.state == 'playing') {
         var track = this.currentTrack();
@@ -591,11 +607,12 @@ $(function() {
     playlist: Playlist,
 
     events: {
+      'click .sweep': 'clear',
       'click .play': 'play',
       'click .stop': 'stop',
       'click .prev': 'prev',
       'click .next': 'next',
-      'click .sweep': 'clear',
+      'slide .volume': 'setVolume',
       'slide .seek': 'updateTimes',
       'slidechange .seek': 'updateTimes'
     },
@@ -615,6 +632,9 @@ $(function() {
       });
       this.$('.next').button({
         icons: { primary: "ui-icon-seek-end" }, text: false
+      });
+      this.$('.volume').slider({
+        range: 'min', min: 0, max: 100, value: Track.volume
       });
       this.postime = this.$('.postime');
       this.seekSlider = this.$('.seek').slider({
@@ -653,6 +673,10 @@ $(function() {
 
     clear: function() {
       this.playlist.clear();
+    },
+
+    setVolume: function(e, ui) {
+      this.playlist.setVolume(ui.value);
     },
 
     played: function() {
