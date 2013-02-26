@@ -18,7 +18,7 @@ $(function() {
       return response;
     },
     setupAlbums: function(models) {
-      this.albums = new AlbumList(models);
+      this.albums = new AlbumList(models, {parse: true});
       this.albums.url = '/artists/' + this.id + '/albums';
       this.albums.artist = this;
     },
@@ -53,7 +53,7 @@ $(function() {
       return response;
     },
     setupTracks: function(models) {
-      this.tracks = new TrackList(models);
+      this.tracks = new TrackList(models, {parse: true});
       this.tracks.url = '/albums/' + this.id + '/tracks';
       this.tracks.album = this;
     },
@@ -207,13 +207,6 @@ $(function() {
       this.artist = this.model;
       this.albums = this.artist.albums;
       this.listenTo(this.artist, 'destroy', this.remove);
-      if (this.albums.length == 0) {
-        this.listenTo(this.albums, 'reset', this.addAlbums);
-        this.albums.fetch();
-      }
-      else {
-        this.addAlbums(this.albums);
-      }
     },
 
     render: function() {
@@ -229,6 +222,7 @@ $(function() {
         icons: { primary: 'ui-icon-triangle-1-e' },
         text: false
       });
+      this.addAlbums(this.albums);
       return this;
     },
 
@@ -272,13 +266,6 @@ $(function() {
       this.album = this.model;
       this.tracks = this.album.tracks;
       this.listenTo(this.album, 'destroy', this.remove);
-      if (this.tracks.length == 0) {
-        this.listenTo(this.tracks, 'reset', this.addTracks);
-        this.tracks.fetch();
-      }
-      else {
-        this.addTracks(this.tracks);
-      }
     },
 
     render: function() {
@@ -294,6 +281,7 @@ $(function() {
         icons: { primary: 'ui-icon-triangle-1-e' },
         text: false
       });
+      this.addTracks(this.tracks);
       return this;
     },
 
