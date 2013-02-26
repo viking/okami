@@ -15,7 +15,12 @@ class TestLoader < Test::Unit::TestCase
       mp3_file = File.join(root, "foo.mp3")
 
       loader = Loader.new(root)
-      loader.run.join
+      now = Time.now
+      Timecop.freeze(now) do
+        loader.run.join
+      end
+      assert_equal 1, Database[:status].count
+      assert_equal now.to_i, Database[:status].first[:last_updated_at].to_i
 
       assert_equal 1, Artist.count
       artist = Artist.first
@@ -85,7 +90,12 @@ class TestLoader < Test::Unit::TestCase
       Mp3Info.open(mp3_file) do |mp3|
         mp3.tag.title = "Qux"
       end
-      loader.run.join
+      now = Time.now
+      Timecop.freeze(now) do
+        loader.run.join
+      end
+      assert_equal 1, Database[:status].count
+      assert_equal now.to_i, Database[:status].first[:last_updated_at].to_i
 
       assert_equal 1, Artist.count
       assert_equal 1, Album.count

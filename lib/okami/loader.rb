@@ -34,7 +34,20 @@ module Okami
       if @thread.nil? || !@thread.alive?
         @thread = Thread.new do
           @status = 'running'
-          Database.transaction { _run }
+          Database.transaction do
+            ds = Database[:status]
+            first_run = ds.count == 0
+            since = first_run ? nil : ds.first[:last_updated_at]
+
+            started_at = Time.now
+            _run(since)
+
+            if first_run
+              ds.insert(:last_updated_at => started_at)
+            else
+              ds.update(:last_updated_at => started_at)
+            end
+          end
           @status = 'finished'
         end
       end
@@ -43,7 +56,7 @@ module Okami
 
     private
 
-    def _run
+    def _run(since)
       files = Dir.glob(File.join(@root, "**", "**"))
       @num_files = files.length
 
@@ -53,6 +66,7 @@ module Okami
         @files_checked = i
 
         next if File.directory?(filename)
+        next if since && File.stat(filename).mtime <= since
 
         info = Info.new(filename)
         next if info.empty?
@@ -60,32 +74,30 @@ module Okami
         track = Track.filter(:filename => info.track[:filename]).first
         if track
           unmark << track.id
-          if File.stat(filename).mtime > track.updated_at
-            track_attribs = info.track
 
-            artist = track.artist
-            new_artist = nil
-            unless info.artist.all? { |(k, v)| artist[k] == v }
-              new_artist = Artist.find_or_create(info.artist)
-              track_attribs[:artist] = new_artist
-            end
+          track_attribs = info.track
+          artist = track.artist
+          new_artist = nil
+          unless info.artist.all? { |(k, v)| artist[k] == v }
+            new_artist = Artist.find_or_create(info.artist)
+            track_attribs[:artist] = new_artist
+          end
 
-            album = track.album
-            new_album = nil
-            if info.album.any? { |(k, v)| album[k] != v }
-              new_album = Album.find_or_create(info.album.merge(:artist => artist))
-              track_attribs[:album] = new_album
-            elsif new_artist
-              album.update(:artist => new_artist)
-            end
+          album = track.album
+          new_album = nil
+          if info.album.any? { |(k, v)| album[k] != v }
+            new_album = Album.find_or_create(info.album.merge(:artist => artist))
+            track_attribs[:album] = new_album
+          elsif new_artist
+            album.update(:artist => new_artist)
+          end
 
-            track.update(track_attribs)
-            if new_artist && artist.tracks_dataset.count == 0
-              artist.albums.each(&:destroy)
-              artist.destroy
-            elsif new_album && album.tracks_dataset.count == 0
-              album.destroy
-            end
+          track.update(track_attribs)
+          if new_artist && artist.tracks_dataset.count == 0
+            artist.albums.each(&:destroy)
+            artist.destroy
+          elsif new_album && album.tracks_dataset.count == 0
+            album.destroy
           end
         else
           artist = Artist.find_or_create(info.artist)

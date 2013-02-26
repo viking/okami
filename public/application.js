@@ -347,15 +347,15 @@ $(function() {
     discoverUpdate: function(data) {
       this.$progress.progressbar('option', 'max', data.num_files);
       this.$progress.progressbar('option', 'value', data.files_checked);
-      if (data.num_files == data.files_checked) {
+      if (data.status == 'finished') {
         clearInterval(this.discoverInterval);
-        this.artists.fetch({
-          success: _.bind(function(collection, resp, options) {
-            this.spinner.stop();
-            this.$overlay.remove();
-          }, this)
-        });
+        this.artists.fetch({success: _.bind(this.artistsFetched, this)});
       }
+    },
+
+    artistsFetched: function(collection, resp, options) {
+      this.spinner.stop();
+      this.$overlay.remove();
     },
 
     addArtist: function(artist) {
