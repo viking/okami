@@ -3,7 +3,7 @@ module Okami
     helpers Sinatra::Streaming
 
     set :root, Root.to_s
-    set :discover_thread, nil
+    set :loader, nil
 
     get "/" do
       send_file File.join(settings.views, 'index.html')
@@ -60,13 +60,24 @@ module Okami
       end
     end
 
-    get "/discover" do
-      if settings.discover_thread.nil?
-        thread = Thread.new do
-          Okami::Loader.run
-        end
-        settings.discover_thread = thread
+    get "/discover/start" do
+      if settings.loader.nil?
+        loader = Okami::Loader.new
+        loader.run
+        settings.loader = loader
       end
+      {'status' => settings.loader.status}.to_json
+    end
+
+    get "/discover/status" do
+      loader = settings.loader
+      data = {'status' => nil}
+      if loader
+        data['status'] = loader.status
+        data['num_files'] = loader.num_files
+        data['files_checked'] = loader.files_checked
+      end
+      data.to_json
     end
   end
 end

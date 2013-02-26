@@ -15,7 +15,7 @@ class TestLoader < Test::Unit::TestCase
       mp3_file = File.join(root, "foo.mp3")
 
       loader = Loader.new(root)
-      loader.run
+      loader.run.join
 
       assert_equal 1, Artist.count
       artist = Artist.first
@@ -43,7 +43,7 @@ class TestLoader < Test::Unit::TestCase
       FileUtils.cp(fixture_path("foo-2.mp3"), root)
 
       loader = Loader.new(root)
-      loader.run
+      loader.run.join
 
       assert_equal 1, Artist.count
       artist = Artist.first
@@ -66,7 +66,7 @@ class TestLoader < Test::Unit::TestCase
       FileUtils.cp(fixture_path("bar-2.mp3"), root)
 
       loader = Loader.new(root)
-      loader.run
+      loader.run.join
 
       assert_equal 1, Artist.count
       assert_equal 2, Album.count
@@ -80,12 +80,12 @@ class TestLoader < Test::Unit::TestCase
       mp3_file = File.join(root, "foo.mp3")
 
       loader = Loader.new(root)
-      Timecop.freeze(Time.now - 123) { loader.run }
+      Timecop.freeze(Time.now - 123) { loader.run.join }
 
       Mp3Info.open(mp3_file) do |mp3|
         mp3.tag.title = "Qux"
       end
-      loader.run
+      loader.run.join
 
       assert_equal 1, Artist.count
       assert_equal 1, Album.count
@@ -103,12 +103,12 @@ class TestLoader < Test::Unit::TestCase
       mp3_file = File.join(root, "foo.mp3")
 
       loader = Loader.new(root)
-      Timecop.freeze(Time.now - 123) { loader.run }
+      Timecop.freeze(Time.now - 123) { loader.run.join }
 
       Mp3Info.open(mp3_file) do |mp3|
         mp3.tag.artist = "Bar"
       end
-      loader.run
+      loader.run.join
 
       assert_equal 2, Artist.count
       track = Track.filter(:filename => mp3_file).first
@@ -123,12 +123,12 @@ class TestLoader < Test::Unit::TestCase
       mp3_file = File.join(root, "foo.mp3")
 
       loader = Loader.new(root)
-      Timecop.freeze(Time.now - 123) { loader.run }
+      Timecop.freeze(Time.now - 123) { loader.run.join }
 
       Mp3Info.open(mp3_file) do |mp3|
         mp3.tag.artist = "Foo bar"
       end
-      loader.run
+      loader.run.join
 
       assert_equal 1, Artist.count
       artist = Artist.first
@@ -146,12 +146,12 @@ class TestLoader < Test::Unit::TestCase
       mp3_file = File.join(root, "foo.mp3")
 
       loader = Loader.new(root)
-      Timecop.freeze(Time.now - 123) { loader.run }
+      Timecop.freeze(Time.now - 123) { loader.run.join }
 
       Mp3Info.open(mp3_file) do |mp3|
         mp3.tag.album = "Blah"
       end
-      loader.run
+      loader.run.join
 
       assert_equal 2, Album.count
       track = Track.filter(:filename => mp3_file).first
@@ -166,12 +166,12 @@ class TestLoader < Test::Unit::TestCase
       mp3_file = File.join(root, "foo.mp3")
 
       loader = Loader.new(root)
-      Timecop.freeze(Time.now - 123) { loader.run }
+      Timecop.freeze(Time.now - 123) { loader.run.join }
 
       Mp3Info.open(mp3_file) do |mp3|
         mp3.tag.album = "Blah"
       end
-      loader.run
+      loader.run.join
 
       assert_equal 1, Album.count
       album = Album.first
@@ -187,10 +187,10 @@ class TestLoader < Test::Unit::TestCase
       mp3_file = File.join(root, "foo.mp3")
 
       loader = Loader.new(root)
-      loader.run
+      loader.run.join
 
       FileUtils.rm(mp3_file)
-      loader.run
+      loader.run.join
 
       assert_equal 0, Artist.count
       assert_equal 0, Album.count
@@ -207,7 +207,7 @@ class TestLoader < Test::Unit::TestCase
       mp3_file = File.join(foo_dir, "foo.mp3")
 
       loader = Loader.new(root)
-      loader.run
+      loader.run.join
 
       assert_equal 2, Artist.count
       assert_equal 2, Album.count

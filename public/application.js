@@ -321,13 +321,31 @@ $(function() {
   });
 
   LibraryView = Backbone.View.extend({
-    el: $('#library'),
+    el: '#library',
 
     initialize: function() {
       this.artists = new ArtistList;
       this.listenTo(this.artists, 'add', this.addArtist);
       this.listenTo(this.artists, 'reset', this.addArtists);
-      this.artists.fetch();
+      this.spinner = new Spinner();
+      this.spinner.spin(this.el);
+      $.get('/discover/start', _.bind(this.discoverStarted, this), 'json');
+    },
+
+    discoverStarted: function() {
+      this.discoverInterval = setInterval(_.bind(this.discoverStatus, this), 1000);
+    },
+
+    discoverStatus: function() {
+      $.get('/discover/status', _.bind(this.discoverUpdate, this), 'json');
+    },
+
+    discoverUpdate: function(data) {
+      if (data.num_files == data.files_checked) {
+        clearInterval(this.discoverInterval);
+        this.spinner.stop();
+        this.artists.fetch();
+      }
     },
 
     addArtist: function(artist) {
@@ -394,7 +412,7 @@ $(function() {
   });
 
   PlaylistView = Backbone.View.extend({
-    el: $('#playlist'),
+    el: '#playlist',
 
     events: {
       'drop': 'dropped',
@@ -602,7 +620,7 @@ $(function() {
   Playlist = new PlaylistView;
 
   ControlsView = Backbone.View.extend({
-    el: $('#controls'),
+    el: '#controls',
 
     playlist: Playlist,
 

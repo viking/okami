@@ -129,13 +129,41 @@ class TestApplication < Test::Unit::TestCase
     assert last_response.ok?
   end
 
-  test "/discover" do
-    pend
+  test "/discover/start" do
     seq = SequenceHelper.new('discover')
-    seq << Thread.expects(:new).yields
-    seq << Okami::Loader.expects(:run)
+    seq << app.expects(:loader).returns(nil)
+    loader = stub('loader')
+    seq << Okami::Loader.expects(:new).returns(loader)
+    seq << loader.expects(:run)
+    seq << app.expects(:loader=).with(loader)
+    seq << app.expects(:loader).returns(loader)
+    seq << loader.expects(:status).returns('running')
 
-    xhr '/discover'
+    xhr '/discover/start'
     assert last_response.ok?
+    assert_equal({'status' => 'running'}.to_json, last_response.body)
+  end
+
+  test "/discover/status" do
+    seq = SequenceHelper.new('discover')
+    loader = stub('loader')
+    seq << app.expects(:loader).returns(loader)
+    seq << loader.expects(:status).returns('running')
+    seq << loader.expects(:num_files).returns(1000)
+    seq << loader.expects(:files_checked).returns(100)
+
+    xhr '/discover/status'
+    assert last_response.ok?
+    assert_equal({
+      'status' => 'running', 'num_files' => 1000, 'files_checked' => 100
+    }.to_json, last_response.body)
+  end
+
+  test "/discover/status with no loader" do
+    app.expects(:loader).returns(nil)
+
+    xhr '/discover/status'
+    assert last_response.ok?
+    assert_equal({'status' => nil}.to_json, last_response.body)
   end
 end

@@ -22,40 +22,44 @@ module Okami
       end
     end
 
-    def self.run
-      new(Library).run
-    end
+    attr_reader :status, :files_checked, :num_files
 
-    def initialize(root)
+    def initialize(root = Library)
       @root = root
+      @thread = nil
+      @status = 'ready'
     end
 
     def run
-      Database.transaction do
-        marked = Track.select_map(:id)
-        unmark = traverse(@root)
-        marked -= unmark
-
-        Track.filter(:id => marked).each(&:destroy)
-        Album.orphaned.each(&:destroy)
-        Artist.orphaned.each(&:destroy)
+      if @thread.nil? || !@thread.alive?
+        @thread = Thread.new do
+          @status = 'running'
+          Database.transaction { _run }
+          @status = 'finished'
+        end
       end
+      @thread
     end
 
-    def traverse(dir)
-      track_ids_found = []
-      Dir.glob(File.join(dir, "*")).each do |filename|
-        if File.directory?(filename)
-          track_ids_found += traverse(filename)
-          next
-        end
+    private
+
+    def _run
+      files = Dir.glob(File.join(@root, "**", "**"))
+      @num_files = files.length
+
+      marked = Track.select_map(:id)
+      unmark = []
+      files.each_with_index do |filename, i|
+        @files_checked = i
+
+        next if File.directory?(filename)
 
         info = Info.new(filename)
         next if info.empty?
 
         track = Track.filter(:filename => info.track[:filename]).first
         if track
-          track_ids_found << track.id
+          unmark << track.id
           if File.stat(filename).mtime > track.updated_at
             track_attribs = info.track
 
@@ -89,7 +93,12 @@ module Okami
           track = Track.create(info.track.merge(:artist => artist, :album => album))
         end
       end
-      track_ids_found
+      @files_checked = @num_files
+      marked -= unmark
+
+      Track.filter(:id => marked).each(&:destroy)
+      Album.orphaned.each(&:destroy)
+      Artist.orphaned.each(&:destroy)
     end
   end
 end

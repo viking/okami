@@ -5,11 +5,6 @@ require "okami"
 Sequel::Migrator.apply(Okami::Database,
   File.join(File.dirname(__FILE__), "..", "db", "migrate"))
 
-$stderr.print "Discovering music..."
-$stderr.flush
-Okami::Loader.run
-$stderr.puts "done."
-
 # set options afterwards, so we can benefit from rack's option parser
 server = Rack::Server.new
 server.options = server.options.merge({
