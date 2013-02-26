@@ -20,6 +20,23 @@ html, body {
   border-right: 1px solid gray;
   /*padding: 0 10px 10px 10px;*/
 }
+#library .overlay {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 250px;
+  height: 100%;
+  background-color: white;
+  z-index: 10;
+}
+#library .overlay .spin {
+  height: 60%;
+  z-index: 20;
+}
+#library .overlay .progress {
+  z-index: 20;
+  margin: 0 10px;
+}
 #library div.search {
   text-align: center;
   margin: 10px auto;

@@ -327,13 +327,17 @@ $(function() {
       this.artists = new ArtistList;
       this.listenTo(this.artists, 'add', this.addArtist);
       this.listenTo(this.artists, 'reset', this.addArtists);
+      this.$overlay = $('<div class="overlay"></div>').appendTo(this.$el);
+      this.$spin = $('<div class="spin"></div>').appendTo(this.$overlay);
       this.spinner = new Spinner();
-      this.spinner.spin(this.el);
+      this.spinner.spin(this.$spin.get(0));
+      this.$progress = $('<div class="progress"></div>').
+        appendTo(this.$overlay).progressbar();
       $.get('/discover/start', _.bind(this.discoverStarted, this), 'json');
     },
 
     discoverStarted: function() {
-      this.discoverInterval = setInterval(_.bind(this.discoverStatus, this), 1000);
+      this.discoverInterval = setInterval(_.bind(this.discoverStatus, this), 200);
     },
 
     discoverStatus: function() {
@@ -341,10 +345,16 @@ $(function() {
     },
 
     discoverUpdate: function(data) {
+      this.$progress.progressbar('option', 'max', data.num_files);
+      this.$progress.progressbar('option', 'value', data.files_checked);
       if (data.num_files == data.files_checked) {
         clearInterval(this.discoverInterval);
-        this.spinner.stop();
-        this.artists.fetch();
+        this.artists.fetch({
+          success: _.bind(function(collection, resp, options) {
+            this.spinner.stop();
+            this.$overlay.remove();
+          }, this)
+        });
       }
     },
 
