@@ -9,14 +9,14 @@ module Okami
       send_file File.join(settings.views, 'index.html')
     end
 
-    get "/library" do
-      ds = Artist.eager_graph(:albums => :tracks).
-        order(:artists__name, :albums__year, :albums__name, :tracks__number)
-      ds.to_json(:include => {:albums => {:include => :tracks}})
-    end
-
     get "/artists" do
-      Artist.order(:name).to_json
+      if params[:all] == 'true'
+        Artist.eager_graph(:albums => :tracks).
+          order(:artists__name, :albums__year, :albums__name, :tracks__number).
+          to_json(:include => {:albums => {:include => :tracks}})
+      else
+        Artist.order(:name).to_json
+      end
     end
 
     get "/artists/:id" do

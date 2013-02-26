@@ -13,7 +13,16 @@ class TestApplication < Test::Unit::TestCase
     assert last_response.ok?
   end
 
-  test "/library" do
+  test "/artists" do
+    dataset = stub('dataset')
+    Okami::Artist.expects(:order).with(:name).returns(dataset)
+    dataset.expects(:to_json).returns("foo")
+    xhr '/artists'
+    assert last_response.ok?
+    assert_equal "foo", last_response.body
+  end
+
+  test "/artists?all=true" do
     track = stub('track', :id => 3, :name => "foo", :number => 1)
     album = stub('album', {
       :id => 4, :name => "bar", :year => 1234, :tracks => [track]
@@ -28,19 +37,11 @@ class TestApplication < Test::Unit::TestCase
     dataset.expects(:to_json).with({
       :include => {:albums => {:include => :tracks}}
     }).returns("foo")
-    xhr '/library'
+    xhr '/artists', :all => true
     assert last_response.ok?
     assert_equal "foo", last_response.body
   end
 
-  test "/artists" do
-    dataset = stub('dataset')
-    Okami::Artist.expects(:order).with(:name).returns(dataset)
-    dataset.expects(:to_json).returns("foo")
-    xhr '/artists'
-    assert last_response.ok?
-    assert_equal "foo", last_response.body
-  end
 
   test "/artists/1" do
     artist = stub('artist', :id => 1, :name => 'foo')

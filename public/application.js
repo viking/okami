@@ -6,11 +6,21 @@ $(function() {
   Artist = Backbone.Model.extend({
     type: 'artist',
     initialize: function() {
-      this.albums = new AlbumList;
+      if (!this.albums) {
+        this.setupAlbums();
+      }
+    },
+    parse: function(response) {
+      if (response.albums) {
+        this.setupAlbums(response.albums);
+        delete response.albums;
+      }
+      return response;
+    },
+    setupAlbums: function(models) {
+      this.albums = new AlbumList(models);
       this.albums.url = '/artists/' + this.id + '/albums';
       this.albums.artist = this;
-      this.tracks = new TrackList;
-      this.tracks.artist = this;
     },
     queue: function(list) {
       this.albums.queue(list);
@@ -31,7 +41,19 @@ $(function() {
   Album = Backbone.Model.extend({
     type: 'album',
     initialize: function() {
-      this.tracks = new TrackList;
+      if (!this.tracks) {
+        this.setupTracks();
+      }
+    },
+    parse: function(response) {
+      if (response.tracks) {
+        this.setupTracks(response.tracks);
+        delete response.tracks;
+      }
+      return response;
+    },
+    setupTracks: function(models) {
+      this.tracks = new TrackList(models);
       this.tracks.url = '/albums/' + this.id + '/tracks';
       this.tracks.album = this;
     },
@@ -185,8 +207,13 @@ $(function() {
       this.artist = this.model;
       this.albums = this.artist.albums;
       this.listenTo(this.artist, 'destroy', this.remove);
-      this.listenTo(this.albums, 'reset', this.addAlbums);
-      this.albums.fetch();
+      if (this.albums.length == 0) {
+        this.listenTo(this.albums, 'reset', this.addAlbums);
+        this.albums.fetch();
+      }
+      else {
+        this.addAlbums(this.albums);
+      }
     },
 
     render: function() {
@@ -245,8 +272,13 @@ $(function() {
       this.album = this.model;
       this.tracks = this.album.tracks;
       this.listenTo(this.album, 'destroy', this.remove);
-      this.listenTo(this.tracks, 'reset', this.addTracks);
-      this.tracks.fetch();
+      if (this.tracks.length == 0) {
+        this.listenTo(this.tracks, 'reset', this.addTracks);
+        this.tracks.fetch();
+      }
+      else {
+        this.addTracks(this.tracks);
+      }
     },
 
     render: function() {
@@ -325,8 +357,10 @@ $(function() {
 
     initialize: function() {
       this.artists = new ArtistList;
+      this.artists.url = '/artists?all=true';
       this.listenTo(this.artists, 'add', this.addArtist);
       this.listenTo(this.artists, 'reset', this.addArtists);
+
       this.$overlay = $('<div class="overlay"></div>').appendTo(this.$el);
       this.$spin = $('<div class="spin"></div>').appendTo(this.$overlay);
       this.spinner = new Spinner();
@@ -496,6 +530,7 @@ $(function() {
       this.listenTo(track, 'stop', this.trackStopped);
       this.listenTo(track, 'tick', this.trackTicked);
       this.listenTo(track, 'seek', this.trackSeeked);
+      this.listenTo(track, 'kill', this.trackKilled);
 
       var view = new PlaylistTrackView({model: track});
       this.$('.tracks').append(view.render().el);
@@ -532,7 +567,6 @@ $(function() {
       if (this.state != 'ready') {
         track = this.currentTrack();
         track.kill();
-        this.setState('ready');
       }
       if (typeof(skip) == 'number') {
         this.position += skip;
@@ -625,6 +659,11 @@ $(function() {
 
     trackSeeked: function(position) {
       this.trigger('seek', position);
+    },
+
+    trackKilled: function() {
+      this.state = 'ready';
+      this.trigger('kill');
     }
   });
   Playlist = new PlaylistView;
@@ -641,8 +680,7 @@ $(function() {
       'click .prev': 'prev',
       'click .next': 'next',
       'slide .volume': 'setVolume',
-      'slide .seek': 'updateTimes',
-      'slidechange .seek': 'updateTimes'
+      'slide .seek': 'updateTimes'
     },
 
     initialize: function() {
@@ -677,6 +715,7 @@ $(function() {
       this.listenTo(this.playlist, 'pause', this.paused)
       this.listenTo(this.playlist, 'resume', this.resumed)
       this.listenTo(this.playlist, 'tick', this.ticked)
+      this.listenTo(this.playlist, 'kill', this.killed)
     },
 
     play: function() {
@@ -713,6 +752,7 @@ $(function() {
 
     stopped: function() {
       this.setPlayIcon('play');
+      this.seekSlider.slider('option', 'value', 0);
     },
 
     paused: function() {
@@ -729,6 +769,13 @@ $(function() {
         slider('option', 'max', duration).
         slider('value', position);
       this.negtime.html('-' + this.durationToTime(duration - position));
+    },
+
+    killed: function() {
+      this.setPlayIcon('play');
+      this.postime.html('');
+      this.negtime.html('');
+      this.seekSlider.slider('option', 'value', 0);
     },
 
     setPlayIcon: function(which) {

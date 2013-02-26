@@ -14,7 +14,8 @@ module Okami
   Database = Sequel.connect({
     :adapter => 'sqlite',
     :database => ENV['OKAMI_DATABASE'] || File.join(Library, 'okami.db'),
-    :logger => Logger.new(STDERR)
+    :logger => Logger.new(
+      File.open(ENV['OKAMI_LOG'] || File.join(Library, 'okami.log'), 'w'))
   })
 
   autoload :Artist, "okami/artist"

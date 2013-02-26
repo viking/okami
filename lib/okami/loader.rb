@@ -57,24 +57,30 @@ module Okami
     private
 
     def _run(since)
+      # FIXME: don't load all these strings in memory
       files = Dir.glob(File.join(@root, "**", "**"))
+
       @num_files = files.length
 
-      marked = Track.select_map(:id)
-      unmark = []
+      mark = []
       files.each_with_index do |filename, i|
         @files_checked = i
 
-        next if File.directory?(filename)
+        if File.directory?(filename)
+          mark << i
+          next
+        end
+
         next if since && File.stat(filename).mtime <= since
 
         info = Info.new(filename)
-        next if info.empty?
+        if info.empty?
+          mark << i
+          next
+        end
 
         track = Track.filter(:filename => info.track[:filename]).first
         if track
-          unmark << track.id
-
           track_attribs = info.track
           artist = track.artist
           new_artist = nil
@@ -106,9 +112,13 @@ module Okami
         end
       end
       @files_checked = @num_files
-      marked -= unmark
+      mark.reverse_each do |i|
+        files.delete_at(i)
+      end
 
-      Track.filter(:id => marked).each(&:destroy)
+      # NOTE: this creates a really huge query
+      Track.exclude(:filename => files).each(&:destroy)
+
       Album.orphaned.each(&:destroy)
       Artist.orphaned.each(&:destroy)
     end
