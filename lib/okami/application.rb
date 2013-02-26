@@ -63,9 +63,9 @@ module Okami
     get "/discover/start" do
       if settings.loader.nil?
         loader = Okami::Loader.new
-        loader.run
         settings.loader = loader
       end
+      settings.loader.run
       {'status' => settings.loader.status}.to_json
     end
 

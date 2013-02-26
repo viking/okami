@@ -135,8 +135,9 @@ class TestApplication < Test::Unit::TestCase
     seq << app.expects(:loader).returns(nil)
     loader = stub('loader')
     seq << Okami::Loader.expects(:new).returns(loader)
-    seq << loader.expects(:run)
     seq << app.expects(:loader=).with(loader)
+    seq << app.expects(:loader).returns(loader)
+    seq << loader.expects(:run)
     seq << app.expects(:loader).returns(loader)
     seq << loader.expects(:status).returns('running')
 
