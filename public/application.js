@@ -6,10 +6,12 @@ $(function() {
   Artist = Backbone.Model.extend({
     type: 'artist',
     initialize: function() {
+      this.filtered = false;
       if (!this.albums) {
         this.setupAlbums();
       }
     },
+
     parse: function(response) {
       if (response.albums) {
         this.setupAlbums(response.albums);
@@ -17,34 +19,87 @@ $(function() {
       }
       return response;
     },
+
     setupAlbums: function(models) {
       this.albums = new AlbumList(models, {parse: true});
       this.albums.url = '/artists/' + this.id + '/albums';
       this.albums.artist = this;
     },
+
     queue: function(list) {
-      this.albums.queue(list);
+      if (!this.filtered) {
+        this.albums.queue(list);
+      }
+    },
+
+    filter: function(regexp) {
+      var match = regexp.test(this.get('name'));
+      if (match) {
+        this.unfilter();
+        this.trigger('filterhit');
+      }
+      else {
+        this.albums.each(function(album) {
+          var result = album.filter(regexp);
+          if (!match) {
+            match = result;
+          }
+        });
+
+        if (match) {
+          this.unfilter(true);
+        }
+        else {
+          this.filtered = true;
+          this.trigger('filtered');
+        }
+      }
+      return(match);
+    },
+
+    unfilter: function(noPropagation) {
+      if (this.filtered) {
+        this.filtered = false;
+        this.trigger('unfiltered');
+      }
+      if (!noPropagation) {
+        this.albums.invoke('unfilter');
+      }
     }
   });
 
   ArtistList = Backbone.Collection.extend({
     model: Artist,
+
     url: '/artists',
+
     comparator: function(artist) {
       return artist.get("name");
     },
+
     queue: function(list) {
       this.invoke('queue', list);
+    },
+
+    filter: function(regexp) {
+      this.invoke('filter', regexp);
+    },
+
+    unfilter: function() {
+      this.invoke('unfilter');
     }
   });
 
   Album = Backbone.Model.extend({
     type: 'album',
+
     initialize: function() {
+      this.filtered = false;
       if (!this.tracks) {
         this.setupTracks();
       }
     },
+
     parse: function(response) {
       if (response.tracks) {
         this.setupTracks(response.tracks);
@@ -52,19 +107,60 @@ $(function() {
       }
       return response;
     },
+
     setupTracks: function(models) {
       this.tracks = new TrackList(models, {parse: true});
       this.tracks.url = '/albums/' + this.id + '/tracks';
       this.tracks.album = this;
     },
+
     queue: function(list) {
-      this.tracks.queue(list);
+      if (!this.filtered) {
+        this.tracks.queue(list);
+      }
+    },
+
+    filter: function(regexp) {
+      var match = regexp.test(this.get('name'));
+      if (match) {
+        this.unfilter();
+        this.trigger('filterhit');
+      }
+      else {
+        this.tracks.each(function(track) {
+          var result = track.filter(regexp);
+          if (!match) {
+            match = result;
+          }
+        });
+
+        if (match) {
+          this.unfilter(true);
+        }
+        else {
+          this.filtered = true;
+          this.trigger('filtered');
+        }
+      }
+      return(match);
+    },
+
+    unfilter: function(noPropagation) {
+      if (this.filtered) {
+        this.filtered = false;
+        this.trigger('unfiltered');
+      }
+      if (!noPropagation) {
+        this.tracks.invoke('unfilter');
+      }
     }
   });
 
   AlbumList = Backbone.Collection.extend({
     model: Album,
+
     url: '/albums',
+
     comparator: function(album_1, album_2) {
       var year_1 = album_1.get('year');
       var year_2 = album_2.get('year');
@@ -80,6 +176,7 @@ $(function() {
       var name_2 = album_2.get('name');
       return name_1 < name_2 ? -1 : (name_1 == name_2 ? 0 : 1)
     },
+
     queue: function(list) {
       this.invoke('queue', list);
     }
@@ -90,10 +187,33 @@ $(function() {
 
     initialize: function() {
       this.streamUrl = '/tracks/' + this.id + '/stream';
+      this.filtered = false;
     },
 
     queue: function(list) {
-      list.add(this);
+      if (!this.filtered) {
+        list.add(this);
+      }
+    },
+
+    filter: function(regexp) {
+      var match = regexp.test(this.get('name'));
+      if (match) {
+        this.unfilter();
+        this.trigger('filterhit');
+      }
+      else {
+        this.filtered = true;
+        this.trigger('filtered');
+      }
+      return(match);
+    },
+
+    unfilter: function() {
+      if (this.filtered) {
+        this.filtered = false;
+        this.trigger('unfiltered');
+      }
     },
 
     initializeSound: function() {
@@ -207,6 +327,9 @@ $(function() {
       this.artist = this.model;
       this.albums = this.artist.albums;
       this.listenTo(this.artist, 'destroy', this.remove);
+      this.listenTo(this.artist, 'filtered', this.filtered);
+      this.listenTo(this.artist, 'unfiltered', this.unfiltered);
+      this.listenTo(this.artist, 'filterhit', this.filterhit);
     },
 
     render: function() {
@@ -226,8 +349,28 @@ $(function() {
       return this;
     },
 
+    filtered: function() {
+      this.$el.hide();
+    },
+
+    unfiltered: function() {
+      this.$el.show();
+    },
+
+    filterhit: function() {
+      this.toggle(false);
+    },
+
     toggle: function() {
-      if (this.$el.hasClass('closed')) {
+      var bool;
+      if (arguments.length > 0 && typeof(arguments[0]) == 'boolean') {
+        bool = arguments[0];
+      }
+      else {
+        bool = this.$el.hasClass('closed');
+      }
+
+      if (bool) {
         this.$el.removeClass('closed');
         this.button.button('option', 'icons', {primary: 'ui-icon-triangle-1-s'});
       }
@@ -239,6 +382,7 @@ $(function() {
 
     addAlbum: function(album) {
       var view = new LibraryAlbumView({model: album});
+      view.parent = this;
       this.$('.albums').append(view.render().el);
     },
 
@@ -266,6 +410,9 @@ $(function() {
       this.album = this.model;
       this.tracks = this.album.tracks;
       this.listenTo(this.album, 'destroy', this.remove);
+      this.listenTo(this.album, 'filtered', this.filtered);
+      this.listenTo(this.album, 'unfiltered', this.unfiltered);
+      this.listenTo(this.album, 'filterhit', this.filterhit);
     },
 
     render: function() {
@@ -285,10 +432,36 @@ $(function() {
       return this;
     },
 
+    filtered: function() {
+      this.$el.hide();
+    },
+
+    unfiltered: function() {
+      this.$el.show();
+    },
+
+    filterhit: function() {
+      if (this.parent) {
+        this.parent.toggle(true);
+      }
+      this.toggle(false);
+    },
+
     toggle: function() {
-      if (this.$el.hasClass('closed')) {
+      var bool;
+      if (arguments.length > 0 && typeof(arguments[0]) == 'boolean') {
+        bool = arguments[0];
+      }
+      else {
+        bool = this.$el.hasClass('closed');
+      }
+
+      if (bool) {
         this.$el.removeClass('closed');
         this.button.button('option', 'icons', {primary: 'ui-icon-triangle-1-s'});
+        if (this.parent) {
+          this.parent.toggle(true);
+        }
       }
       else {
         this.$el.addClass('closed');
@@ -298,6 +471,7 @@ $(function() {
 
     addTrack: function(track) {
       var view = new LibraryTrackView({model: track});
+      view.parent = this;
       this.$('.tracks').append(view.render().el);
     },
 
@@ -320,6 +494,9 @@ $(function() {
     initialize: function() {
       this.track = this.model;
       this.listenTo(this.track, 'destroy', this.remove);
+      this.listenTo(this.track, 'filtered', this.filtered);
+      this.listenTo(this.track, 'unfiltered', this.unfiltered);
+      this.listenTo(this.track, 'filterhit', this.filterhit);
     },
 
     render: function() {
@@ -333,6 +510,20 @@ $(function() {
       return this;
     },
 
+    filtered: function() {
+      this.$el.hide();
+    },
+
+    unfiltered: function() {
+      this.$el.show();
+    },
+
+    filterhit: function() {
+      if (this.parent) {
+        this.parent.toggle(true);
+      }
+    },
+
     dragHelper: function(e) {
       var result = $('<div class="track-drag"></div>');
       result.html(this.model.get('name'));
@@ -342,6 +533,10 @@ $(function() {
 
   LibraryView = Backbone.View.extend({
     el: '#library',
+
+    events: {
+      'keyup #filter': 'filterChanged'
+    },
 
     initialize: function() {
       this.artists = new ArtistList;
@@ -359,7 +554,7 @@ $(function() {
     },
 
     discoverStarted: function() {
-      this.discoverInterval = setInterval(_.bind(this.discoverStatus, this), 200);
+      setTimeout(_.bind(this.discoverStatus, this), 200);
     },
 
     discoverStatus: function() {
@@ -370,14 +565,32 @@ $(function() {
       this.$progress.progressbar('option', 'max', data.num_files);
       this.$progress.progressbar('option', 'value', data.files_checked);
       if (data.status == 'finished') {
-        clearInterval(this.discoverInterval);
         this.artists.fetch({success: _.bind(this.artistsFetched, this)});
+      }
+      else {
+        setTimeout(_.bind(this.discoverStatus, this), 200);
       }
     },
 
     artistsFetched: function(collection, resp, options) {
       this.spinner.stop();
       this.$overlay.remove();
+    },
+
+    filterChanged: function(e) {
+      if (e.which == 8 || e.which >= 32) {
+        this.filter(this.$('#filter').val());
+      }
+    },
+
+    filter: function(pattern) {
+      if (pattern == "") {
+        this.artists.unfilter();
+      }
+      else {
+        var re = new RegExp(pattern, "i");
+        this.artists.filter(re);
+      }
     },
 
     addArtist: function(artist) {
