@@ -10,12 +10,23 @@ module Okami
     end
 
     get "/artists" do
+      dataset = Artist
+      if params[:limit]
+        dataset =
+          if params[:offset]
+            dataset.limit(params[:limit].to_i, params[:offset].to_i)
+          else
+            dataset.limit(params[:limit].to_i)
+          end
+      end
+
       if params[:all] == 'true'
-        Artist.eager_graph(:albums => :tracks).
-          order(:artists__name, :albums__year, :albums__name, :tracks__number).
-          to_json(:include => {:albums => {:include => :tracks}})
+        albums_proc = proc { |ds| ds.order(:year, :name) }
+        tracks_proc = proc { |ds| ds.order(:number) }
+        dataset.eager(:albums => {albums_proc => {:tracks => tracks_proc}}).
+          order(:name).to_json(:include => {:albums => {:include => :tracks}})
       else
-        Artist.order(:name).to_json
+        dataset.order(:name).to_json
       end
     end
 

@@ -29,11 +29,14 @@ class TestApplication < Test::Unit::TestCase
     })
     artist = stub('artist', :id => 5, :name => "baz", :albums => [album])
     dataset = stub('dataset')
-    Okami::Artist.expects(:eager_graph).with(:albums => :tracks).
-      returns(dataset)
-    dataset.expects(:order).
-      with(:artists__name, :albums__year, :albums__name, :tracks__number).
-      returns(dataset)
+    Okami::Artist.expects(:eager).with { |hash|
+      hash.keys == [:albums] &&
+        hash[:albums].length == 1 &&
+        hash[:albums].keys[0].instance_of?(Proc) &&
+        hash[:albums].values[0].keys == [:tracks] &&
+        hash[:albums].values[0][:tracks].instance_of?(Proc)
+    }.returns(dataset)
+    dataset.expects(:order).with(:name).returns(dataset)
     dataset.expects(:to_json).with({
       :include => {:albums => {:include => :tracks}}
     }).returns("foo")
@@ -42,6 +45,21 @@ class TestApplication < Test::Unit::TestCase
     assert_equal "foo", last_response.body
   end
 
+  test "/artists?all=true&limit=10&offset=20" do
+    track = stub('track', :id => 3, :name => "foo", :number => 1)
+    album = stub('album', {
+      :id => 4, :name => "bar", :year => 1234, :tracks => [track]
+    })
+    artist = stub('artist', :id => 5, :name => "baz", :albums => [album])
+    dataset = stub('dataset')
+    Okami::Artist.expects(:limit).with(10, 20).returns(dataset)
+    dataset.stubs(:eager).returns(dataset)
+    dataset.stubs(:order).returns(dataset)
+    dataset.stubs(:to_json).returns("foo")
+    xhr '/artists', :all => true, :limit => 10, :offset => 20
+    assert last_response.ok?
+    assert_equal "foo", last_response.body
+  end
 
   test "/artists/1" do
     artist = stub('artist', :id => 1, :name => 'foo')

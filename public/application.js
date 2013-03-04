@@ -540,7 +540,6 @@ $(function() {
 
     initialize: function() {
       this.artists = new ArtistList;
-      this.artists.url = '/artists?all=true';
       this.listenTo(this.artists, 'add', this.addArtist);
       this.listenTo(this.artists, 'reset', this.addArtists);
 
@@ -565,16 +564,30 @@ $(function() {
       this.$progress.progressbar('option', 'max', data.num_files);
       this.$progress.progressbar('option', 'value', data.files_checked);
       if (data.status == 'finished') {
-        this.artists.fetch({success: _.bind(this.artistsFetched, this)});
+        this.fetchArtists(50, 0);
       }
       else {
         setTimeout(_.bind(this.discoverStatus, this), 200);
       }
     },
 
-    artistsFetched: function(collection, resp, options) {
-      this.spinner.stop();
-      this.$overlay.remove();
+    fetchArtists: function(limit, offset) {
+      this.artists.fetch({
+        update: true,
+        merge: false,
+        remove: false,
+        data: { 'all': 'true', 'limit': limit, 'offset': offset },
+        success: _.bind(function(collection, response, options) {
+          if (response.length == limit) {
+            this.fetchArtists(limit, offset + limit);
+          }
+          else {
+            /* Assume we're done. Yes, making an ass out of u and me. */
+            this.spinner.stop();
+            this.$overlay.remove();
+          }
+        }, this)
+      });
     },
 
     filterChanged: function(e) {
